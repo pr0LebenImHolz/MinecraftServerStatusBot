@@ -15,8 +15,8 @@ const client = new Discord.Client();
 
 // dev overwrites
 if (Constants.dev === true){
-	Constants.tls.key = './dev/key.pem';
-	Constants.tls.cert = './dev/cert.pem';
+	Constants.tls.key = './dev/privkey.pem';
+	Constants.tls.cert = './dev/fullchain.pem';
 }
 
 // methods
@@ -79,6 +79,8 @@ function updateBot(status) {
 
 var botAvailable = false;
 
+logger.info(`Initialized Script`);
+
 // bot callbacks
 client.once('ready', () => {
 	logger.info(`Logged in as ${client.user.tag}`);
@@ -94,7 +96,7 @@ var server = Https.createServer({key: Fs.readFileSync(Constants.tls.key), cert: 
 	if (url.hostname === Constants.api.host && url.port == Constants.api.port) {
 		if (url.searchParams.get('token') === Constants.api.token) {
 			switch (url.pathname) {
-				case '/':
+				case Constants.api.basePath:
 					var target = url.searchParams.get('target');
 					switch (method) {
 						case 'GET':
