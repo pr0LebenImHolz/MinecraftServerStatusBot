@@ -1,8 +1,8 @@
 'use-strict';
 // data
 const Constants = require('./Constants.js');
-// imported by Constants // const BotStatus = require('./Util/BotStatus.js');
 // libs
+const BotStatus = require('./Util/BotStatus.js');
 const Logger = require('./Util/Logger.js');
 const Discord = require('discord.js');
 const Https = require('https');
@@ -38,6 +38,10 @@ function pingServer(callback) {
 function updateBot(status) {
 	if (!botAvailable) {
 		logger.error('Received request to update bot status but bot is offline');
+		return false;
+	}
+	if (statusLocked) {
+		logger.info('Received request to update bot status but status is locked');
 		return false;
 	}
 	switch (status) {
@@ -76,8 +80,86 @@ function updateBot(status) {
 	}
 	return true;
 }
+function handleCommand(msg) {
+	var args = msg.content.split(' ');
+	var cmd = args.shift().replace(Constants.bot.commands.prefix, '').toLowerCase();
+	switch (cmd) {
+		case 'help':
+			if (!helpParsed) {
+				logger.info('Parsing help text...');
+				let helpText = '';
+				let q = '`';
+				Object.keys(Constants.bot.commands.commands).forEach((k) => {
+					helpText += `**${k}**\n> ${Constants.bot.commands.commands[k].syntax.length == 0 ? '' : q + Constants.bot.commands.commands[k].syntax + q + ' '}${Constants.bot.commands.commands[k].description}\n`;
+				});
+				Constants.bot.commands.responses.info.command_help = Constants.bot.commands.responses.info.command_help.replace(/%h/g, helpText);
+				helpParsed = true;
+				logger.info('Parsed help text');
+			}
+			sendResponse(msg, Constants.bot.commands.responses.types.info, Constants.bot.commands.responses.info.command_help);
+			break;
+		case 'set':
+			if (args.length >= 3) {
+				args[0] = args[0].toUpperCase();
+				args[1] = args[1].toUpperCase();
+				if (Object.keys(BotStatus.STATUS).indexOf(args[0]) == -1) {
+					sendResponse(msg, Constants.bot.commands.responses.error, Constants.bot.commands.responses.error.command_set_unknown_status);
+					break;
+				}
+				if (Object.keys(BotStatus.ACTIVITY).indexOf(args[1]) == -1) {
+					sendResponse(msg, Constants.bot.commands.responses.error, Constants.bot.commands.responses.error.command_set_unknown_activity);
+					break;
+				}
+				let activity = {status:args.shift(),activity:{type:args.shift(),name:args.join(' ')}};
+				client.user.setPresence(activity).then(() => {
+					sendResponse(msg, Constants.bot.commands.responses.types.success, Constants.bot.commands.responses.success.command_set);
+				});
+			}
+			else {
+				sendResponse(msg, Constants.bot.commands.responses.types.error, Constants.bot.commands.responses.error.illegal_arguments.replace(/%c/g, cmd).replace(/%a/g, Constants.bot.commands.commands[cmd].syntax));
+			}
+			break;
+		case 'lock':
+			statusLocked = true;
+			sendResponse(msg, Constants.bot.commands.responses.types.success, Constants.bot.commands.responses.success.command_lock);
+			break;
+		case 'unlock':
+			statusLocked = false;
+			sendResponse(msg, Constants.bot.commands.responses.types.success, Constants.bot.commands.responses.success.command_unlock);
+			break;
+		case 'reload':
+			pingServer((success, response) => {
+				var activity;
+				if (success) {
+					activity = {
+						activity:{
+							name: Constants.bot.activities.running_2.activity.name.replace(/%c/g, response.playersOnline).replace(/%m/g, response.maxPlayers).replace(/%d/g, response.motd),
+							type: Constants.bot.activities.running_2.activity.type
+						},
+						status: Constants.bot.activities.running_2.status
+					};
+					sendResponse(msg, Constants.bot.commands.responses.types.success, Constants.bot.commands.responses.success.command_reload);
+				}
+				else {
+					logger.info('Received unexpected response from Minecraft Ping, using fallback running activity');
+					activity = Constants.bot.activities.offline;
+					sendResponse(msg, Constants.bot.commands.responses.types.error, Constants.bot.commands.responses.error.command_reload);
+				}
+				client.user.setPresence(activity);
+			});
+			break;
+		default:
+			sendResponse(msg, Constants.bot.commands.responses.types.error, Constants.bot.commands.responses.error.unknown_command);
+			break;
+	} 
+}
+function sendResponse(msg, type, response) {
+	msg.channel.send(response);
+}
 
 var botAvailable = false;
+var helpParsed = false;
+var statusLocked = false;
 
 logger.info(`Initialized Script`);
 
@@ -86,6 +168,21 @@ client.once('ready', () => {
 	logger.info(`Logged in as ${client.user.tag}`);
 	botAvailable = true;
 	updateBot(Constants.server.states.stopped);
+});
+
+client.on('message', msg => {
+	if (msg.content.startsWith(Constants.bot.commands.prefix)) {
+		if (msg.guild != null) {
+			for (id of Constants.bot.commands.roles) {
+				if (msg.member.roles.cache.has(id)) {
+					handleCommand(msg);
+					return;
+				}
+			}
+		}
+		// When the message was send on a DM or the member is not in the whitelisted roles
+		sendResponse(msg, Constants.bot.commands.responses.types.error, Constants.bot.commands.responses.error.insufficient_permission);
+	}
 });
 
 // init server

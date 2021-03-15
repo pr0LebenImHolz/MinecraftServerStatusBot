@@ -51,13 +51,69 @@ module.exports = {
 		 * The discord bot token
 		 */
 		token: 'hippopotomonstrosesquippedaliophobia', //@TODO
+		commands: {
+			prefix: '!', //@TODO
+			help_command: 'help',
+			/*
+			 * The IDs of all roles which can interact with the bot
+			 */
+			roles: [
+			],
+			commands: {
+				'set': {
+					syntax: '[status] [activity type] [activity]',
+					description: 'Sets the status of the bot until the server overwrites it'
+				},
+				'lock': {
+					syntax: '',
+					description: 'Locks the current activity so the server can\'t overwrite it (`set` will still work)'
+				},
+				'unlock': {
+					syntax: '',
+					description: 'Unlocks the current activity so the server can overwrite it again'
+				},
+				'reload': {
+					syntax: '',
+					description: 'Force reload (i.e. pings the server)'
+				}
+			},
+			responses: {
+				types: {
+					error: 0,
+					info: 1,
+					success: 2
+				},
+				error: {
+					insufficient_permission: 'You don\'t have the permission to do that!',
+					internal: 'Oups, anything went terribly wrong here...',
+					unknown_command: 'Unknown command!',
+					illegal_arguments: 'Illegal arguments!\n`%c %a`',
+					command_set: 'Can\'t set activity.',
+					command_set_unknown_status: `Can\'t set activity: Unknown status:\nValid states: ${parseBotStates(BotStatus.STATUS)}`,
+					command_set_unknown_activity: `Can\'t set activity: Unknown activity:\nValid activities: ${parseBotStates(BotStatus.ACTIVITY)}`,
+					command_lock: 'Can\'t lock activity.',
+					command_unlock: 'Can\'t unlock activity.',
+					command_reload: 'Can\'t reload activity.'
+				},
+				info: {
+					command_reload: 'Reloading server status...',
+					command_help: '__**HELP**__\n%h'
+				},
+				success: {
+					command_set: 'Activity set successfully.',
+					command_lock: 'Activity locked successfully.',
+					command_unlock: 'Activity unlocked successfully.',
+					command_reload: 'Reloaded server status successfully.'
+				}
+			}
+		},
 		activities: {
-			starting: {activity:{name:'dem Server beim Starten zu...',type:BotStatus.ACTIVITY.WATCHING},status:BotStatus.STATUS.IDLE},
-			stopping: {activity:{name:'dem Server beim Stoppen zu...',type:BotStatus.ACTIVITY.WATCHING},status:BotStatus.STATUS.IDLE},
+			starting: {activity:{name:'the server starting...',type:BotStatus.ACTIVITY.WATCHING},status:BotStatus.STATUS.IDLE},
+			stopping: {activity:{name:'the server stopping...',type:BotStatus.ACTIVITY.WATCHING},status:BotStatus.STATUS.IDLE},
 			/* 
 			 * Fallback running activity
 			 */
-			running: {activity:{name:'den Spielern beim z0cken zu',type:BotStatus.ACTIVITY.WATCHING},status:BotStatus.STATUS.ONLINE},
+			running: {activity:{name:'the players gambling',type:BotStatus.ACTIVITY.WATCHING},status:BotStatus.STATUS.ONLINE},
 			/* 
 			 * Default running activity
 			 *  
@@ -65,8 +121,8 @@ module.exports = {
 			 * %m = max players
 			 * %d = motd
 			 */
-			running_2: {activity:{name:'%c/%m Spielern beim z0cken zu',type:BotStatus.ACTIVITY.WATCHING},status:BotStatus.STATUS.ONLINE},
-			offline: {activity:{name:'den Geräuschen eines toten Servers zu',type:BotStatus.ACTIVITY.LISTENING},status:BotStatus.STATUS.DND}
+			running_2: {activity:{name:'%c/%m players gambling',type:BotStatus.ACTIVITY.WATCHING},status:BotStatus.STATUS.ONLINE},
+			offline: {activity:{name:'the sounds of a dead server',type:BotStatus.ACTIVITY.LISTENING},status:BotStatus.STATUS.DND}
 		}
 	},
 	server: {
@@ -88,3 +144,11 @@ module.exports = {
 		}
 	}
 };
+
+function parseBotStates(obj) {
+	let result = [];
+	Object.keys(obj).forEach(k => {
+		result.push('`' + k + '`');
+	});
+	return result.join(', ');
+}
