@@ -11,7 +11,7 @@ This DiscordBot uses the [MinecraftStatusUpdater](https://github.com/pr0LebenImH
 | 2.2) [Endpoint: Update](#update) |
 | 3) [Installation](#installation) |
 | 3.1) [Bot Permissions](#bot-permissions) |
-| 3.2) [Installing Script](#installing-scripts) |
+| 3.2) [Installing Script](#installing-script) |
 
 ## Bot Commands
 
