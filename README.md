@@ -1,6 +1,17 @@
 # MinecraftServerStatusBot
 
 This DiscordBot uses the [MinecraftStatusUpdater](https://github.com/pr0LebenImHolz/MinecraftStatusUpdater) Mod to display the status in the activity in real time.
+| Contents |
+| --- |
+| 1) [Bot Commands](#bot-commands) |
+| 1.1) [Bot States](#bot-states) |
+| 1.2) [Bot Activities](#user-content-bot-activities) |
+| 2) [API](#user-content-api) |
+| 2.1) [Endpoint: Version](#user-content-endpoint--version) |
+| 2.2) [Endpoint: Update](#user-content-endpoint--update) |
+| 3) [Installation](#user-content-installation) |
+| 3.1) [Bot Permissions](#user-content-bot-permissions) |
+| 3.2) [Installing Script](#user-content-installing-scripts) |
 
 ## Bot Commands
 
@@ -48,3 +59,15 @@ The Bot returns an HTTP 204 response with an empty response body.
 - RUNNING
 - STOPPING
 - OFFLINE
+
+## Installation
+
+### Bot Permissions
+
+The bot only needs the `Send Messages` permission: `https://discord.com/oauth2/authorize?client_id=<APPLICATION ID>&scope=bot&permissions=2048`
+
+### Installing Script
+
+The Script is tested under Ubuntu 18.04 LTS and Raspbian 10 Buster with NodeJS v14.16.0.
+
+Download the latest release, unzip it and execute it with `node MinecraftServerStatusBot.js`. 
