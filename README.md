@@ -5,13 +5,13 @@ This DiscordBot uses the [MinecraftStatusUpdater](https://github.com/pr0LebenImH
 | --- |
 | 1) [Bot Commands](#bot-commands) |
 | 1.1) [Bot States](#bot-states) |
-| 1.2) [Bot Activities](#user-content-bot-activities) |
-| 2) [API](#user-content-api) |
-| 2.1) [Endpoint: Version](#user-content-endpoint--version) |
-| 2.2) [Endpoint: Update](#user-content-endpoint--update) |
-| 3) [Installation](#user-content-installation) |
-| 3.1) [Bot Permissions](#user-content-bot-permissions) |
-| 3.2) [Installing Script](#user-content-installing-scripts) |
+| 1.2) [Bot Activities](#bot-activities) |
+| 2) [API](#api) |
+| 2.1) [Endpoint: Version](#version) |
+| 2.2) [Endpoint: Update](#update) |
+| 3) [Installation](#installation) |
+| 3.1) [Bot Permissions](#bot-permissions) |
+| 3.2) [Installing Script](#installing-scripts) |
 
 ## Bot Commands
 
