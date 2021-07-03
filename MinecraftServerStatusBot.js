@@ -21,12 +21,13 @@ if (Constants.dev === true){
 
 // methods
 function pingServer(callback) {
-	MinecraftPing.ping_fe01(Constants.server.ping, (err, response) => {
+	MinecraftPing.ping_fefd_udp(Constants.server.ping, (err, response) => {
 		if (err) {
 			logger.error(`Can't ping server: ${err}`);
 			callback(false, err);
 		}
-		else if (typeof response.playersOnline == 'number' && typeof response.maxPlayers == 'number' && typeof response.motd == 'string') {
+		//else if (typeof response.playersOnline == 'number' && typeof response.maxPlayers == 'number' && typeof response.motd == 'string') {
+		else if (typeof response.numPlayers == 'number' && typeof response.maxPlayers == 'number' && typeof response.motd == 'string') {
 			callback(true, response);
 		}
 		else {
@@ -57,7 +58,8 @@ function updateBot(status) {
 				if (success) {
 					activity = {
 						activity:{
-							name: Constants.bot.activities.running_2.activity.name.replace(/%c/g, response.playersOnline).replace(/%m/g, response.maxPlayers).replace(/%d/g, response.motd),
+							//name: Constants.bot.activities.running_2.activity.name.replace(/%c/g, response.playersOnline).replace(/%m/g, response.maxPlayers).replace(/%d/g, response.motd),
+							name: Constants.bot.activities.running_2.activity.name.replace(/%c/g, response.numPlayers).replace(/%m/g, response.maxPlayers).replace(/%d/g, response.motd),
 							type: Constants.bot.activities.running_2.activity.type
 						},
 						status: Constants.bot.activities.running_2.status
@@ -133,7 +135,8 @@ function handleCommand(msg) {
 				if (success) {
 					activity = {
 						activity:{
-							name: Constants.bot.activities.running_2.activity.name.replace(/%c/g, response.playersOnline).replace(/%m/g, response.maxPlayers).replace(/%d/g, response.motd),
+							//name: Constants.bot.activities.running_2.activity.name.replace(/%c/g, response.playersOnline).replace(/%m/g, response.maxPlayers).replace(/%d/g, response.motd),
+							name: Constants.bot.activities.running_2.activity.name.replace(/%c/g, response.numPlayers).replace(/%m/g, response.maxPlayers).replace(/%d/g, response.motd),
 							type: Constants.bot.activities.running_2.activity.type
 						},
 						status: Constants.bot.activities.running_2.status
