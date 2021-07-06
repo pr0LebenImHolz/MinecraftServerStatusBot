@@ -71,3 +71,33 @@ The bot only needs the `Send Messages` permission: `https://discord.com/oauth2/a
 The Script is tested under Ubuntu 18.04 LTS and Raspbian 10 Buster with NodeJS v14.16.0.
 
 Download the latest release, unzip it and execute it with `node MinecraftServerStatusBot.js`. 
+
+#### Using init.d
+
+To start and stop the bot with `systemctl [start|stop|restart] lih-serverstatusbot`, create a new text file in `/etc/init.d` and paste the following code.
+
+```bash
+#! /bin/sh
+# /etc/init.d/lih-serverstatusbot
+
+case "$1" in
+        start)
+                /opt/lih-serverstatusbot/start.sh
+                ;;
+        stop)
+                /opt/lih-serverstatusbot/stop.sh
+                ;;
+        restart)
+                /opt/lih-serverstatusbot/stop.sh
+                /opt/lih-serverstatusbot/start.sh
+                ;;
+esac
+exit 0
+```
+/etc/init.d/lih-serverstatusbot
+
+To start the bot when the system starts, paste this line in `/etc/rc.local`:
+
+```bash
+systemctl start lih-serverstatusbot
+```
