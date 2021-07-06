@@ -112,7 +112,7 @@ function handleCommand(msg) {
 					sendResponse(msg, Constants.bot.commands.responses.error, Constants.bot.commands.responses.error.command_set_unknown_activity);
 					break;
 				}
-				let activity = {status:args.shift(),activity:{type:args.shift(),name:args.join(' ')}};
+				let activity = {status:BotStatus.STATUS[args.shift()],activity:{type:BotStatus.ACTIVITY[args.shift()],name:args.join(' ')}};
 				client.user.setPresence(activity).then(() => {
 					sendResponse(msg, Constants.bot.commands.responses.types.success, Constants.bot.commands.responses.success.command_set);
 				});
