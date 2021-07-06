@@ -74,7 +74,7 @@ Download the latest release, unzip it and execute it with `node MinecraftServerS
 
 #### Using init.d
 
-To start and stop the bot with `systemctl [start|stop|restart] lih-serverstatusbot`, create a new text file in `/etc/init.d` and paste the following code.
+To start and stop the bot with `systemctl [start|stop|restart] lih-serverstatusbot`, create a new text file in `/etc/init.d/` and paste the following code.
 
 ```bash
 #! /bin/sh
@@ -94,7 +94,7 @@ case "$1" in
 esac
 exit 0
 ```
-/etc/init.d/lih-serverstatusbot
+_/etc/init.d/lih-serverstatusbot_
 
 To start the bot when the system starts, paste this line in `/etc/rc.local`:
 
