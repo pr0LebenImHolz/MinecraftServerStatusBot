@@ -149,7 +149,7 @@ function handleCommand(msg) {
 							.replace(/%l/g, Constants.bot.bot_state.locked[Number(statusLocked)])
 							// no clue why, but ...activities[0]... returns the displayed activity
 							.replace(/%a/g, client.user.presence.activities[0].toString()));
-			httpsGetRequest(`${Constants.api.host}:${Constants.api.port}${Constants.api.basePath}?token=${Constants.api.token}&target=version`, Constants.api.timeout, (success, data) => {
+			httpsGetRequest(`https://${Constants.api.host}:${Constants.api.port}${Constants.api.basePath}?token=${Constants.api.token}&target=version`, Constants.api.timeout, (success, data) => {
 				status.replace(/%a/g, Constants.bot.api_state[Number(success && data === Constants.api.version)].replace(/%v/g, Constants.api.version));
 				pingServer((success, data) => {
 					status.replace(/%s/g, Constants.bot.server_state[Number(success)]);

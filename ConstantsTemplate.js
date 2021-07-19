@@ -153,8 +153,8 @@ module.exports = {
 			offline: {activity:{name:'the sounds of a dead server',type:BotStatus.ACTIVITY.LISTENING},status:BotStatus.STATUS.DND}
 		},
 		api_state: [
-			':red_circle: `%v`' // offline or unreachable
-			':green_circle: `%v`', // online
+			':red_circle: `%v`', // offline or unreachable
+			':green_circle: `%v`' // online
 		],
 		bot_state: {
 			/* 
