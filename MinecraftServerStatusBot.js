@@ -99,6 +99,26 @@ function updateBot(status) {
 	}
 	return true;
 }
+function httpsGetRequest(url, timeout, callback) {
+	var timedOut = false;
+	var responded = false;
+	setTimeout(() => {
+		if (responded === false) {
+			timedOut = true;
+			callback(false, 'timeout');
+		}
+	}, timeout);
+	Https.get(url, (res) => {
+		var data = '';
+		res.on('data', (d) => { data += d; });
+		res.on('end', () => {
+			if (timedOut === false) {
+				callback(true, data);
+				responded = true;
+			}
+		});
+	});
+}
 function handleCommand(msg) {
 	var args = msg.content.split(' ');
 	var cmd = args.shift().replace(Constants.bot.commands.prefix, '').toLowerCase();
@@ -129,21 +149,13 @@ function handleCommand(msg) {
 							.replace(/%l/g, Constants.bot.bot_state.locked[Number(statusLocked)])
 							// no clue why, but ...activities[0]... returns the displayed activity
 							.replace(/%a/g, client.user.presence.activities[0].toString()));
-			httpsGetRequest(`${Constants.api.host}:${Constants.api.port}${Constants.api.basePath}?token=${Constants.api.token}&target=version`, (success, data) => {
+			httpsGetRequest(`${Constants.api.host}:${Constants.api.port}${Constants.api.basePath}?token=${Constants.api.token}&target=version`, Constants.api.timeout, (success, data) => {
 				status.replace(/%a/g, Constants.bot.api_state[Number(success && data === Constants.api.version)].replace(/%v/g, Constants.api.version));
 				pingServer((success, data) => {
 					status.replace(/%s/g, Constants.bot.server_state[Number(success)]);
 					sendResponse(msg, Constants.bot.commands.responses.types.info, status);
 				});
 			});
-			Https.get(`${Constants.api.host}:${Constants.api.port}${Constants.api.basePath}?token=${Constants.api.token}&target=version`, (res) => {
-				var data = '';
-				res.on('data', (d) => { data += d; });
-				res.on('end', () => {
-					
-				});
-			}).end();
-			sendResponse(msg, Constants.bot.commands.responses.types.info, status);
 			break;
 		case 'set':
 			if (args.length >= 3) {

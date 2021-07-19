@@ -51,7 +51,11 @@ module.exports = {
 		/* 
 		 * API Version - will be returned so the Mod can check (compare) them
 		 */
-		version: '1.0.0'
+		version: '1.0.0',
+		/*
+		 * timeout when this script calls the api (this happens when the command 'status' is triggered)
+		 */
+		timeout: 3000
 	},
 	bot: {
 		/*
