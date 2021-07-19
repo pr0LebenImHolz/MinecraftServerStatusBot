@@ -15,4 +15,4 @@ DiscordLogger.LogLevels = {
 	API_EVERYTHING: 1, // Logs all API events (server starting/ started/ stopping/ stopped, player joined/ left)
 	API_SERVER: 2 // Logs server API events (server starting/ started/ stopping/ stopped)
 }
-module.exports = DiscordLogging;
+module.exports = DiscordLogger;
