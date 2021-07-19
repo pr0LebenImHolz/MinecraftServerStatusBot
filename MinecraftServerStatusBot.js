@@ -125,7 +125,9 @@ function httpsGetRequest(url, timeout, callback) {
 }
  */
 function handleCommand(msg) {
-	var args = msg.content.split(' ');
+	var fullCommand = args = msg.content.split(' ');
+	fullCommand[0] = fullCommand[0].replace(Constants.bot.commands.prefix, '');
+	fullCommand = fullCommand.join(' ');
 	var cmd = args.shift().replace(Constants.bot.commands.prefix, '').toLowerCase();
 	switch (cmd) {
 		case 'help':
@@ -215,9 +217,6 @@ function handleCommand(msg) {
 			sendResponse(msg, Constants.bot.commands.responses.types.error, Constants.bot.commands.responses.error.unknown_command);
 			break;
 	}
-	var fullCommand = args;
-	fullCommand[0] = fullCommand[0].replace(Constants.bot.commands.prefix, '');
-	fullCommand = fullCommand.join(' ');
 	discordLogger.log(DiscordLogger.LogLevels.EVERYTHING, Constants.bot.logging.messages.used_command_successfully.replace(/%u/g, msg.author.toString()).replace(/%m/g, fullCommand).replace(/%c/g, cmd));
 }
 function sendResponse(msg, type, response) {
