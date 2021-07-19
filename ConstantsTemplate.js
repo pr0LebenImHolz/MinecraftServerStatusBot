@@ -2,6 +2,13 @@ const BotStatus = require('./Util/BotStatus.js');
 
 module.exports = {
 	/*
+	 * Don't change the version unless you know what you're doing.
+	 * - v (full release)
+	 * - pre (pre release)
+	 * - x.y.z (major.minor.patch)
+	 */
+	version: 'v1.0.0',
+	/*
 	 * Don't use this in production - this enables dev logging and some dev variables
 	 * @see MinecraftServerStatusBot.js:16 'dev overwrites'
 	 */
@@ -60,6 +67,14 @@ module.exports = {
 			roles: [
 			],
 			commands: {
+				'ping': {
+					syntax: '',
+					description: 'Testcommand to check if the bot is still running'
+				},
+				'status': {
+					syntax: '',
+					description: 'Shows the current status of the bot and some other useful information'
+				},
 				'set': {
 					syntax: '[status] [activity type] [activity]',
 					description: 'Sets the status of the bot until the server overwrites it'
@@ -98,6 +113,15 @@ module.exports = {
 				info: {
 					command_reload: 'Reloading server status...',
 					command_help: '__**HELP**__\n%h'
+					command_ping: 'Pong!',
+					/* 
+					 * %v = program version
+					 * %b = bot state
+					 * %a = api state
+					 * %s = minecraft server state
+					 */
+					command_status: '__**STATUS**__\n_Version:_ `%v`\n_Bot Status:_ %b\n_API Status:_ %a\n_Server Status:_ %s',
+					command_status_loading: 'Loading States...'
 				},
 				success: {
 					command_set: 'Activity set successfully.',
@@ -123,7 +147,35 @@ module.exports = {
 			 */
 			running_2: {activity:{name:'%c/%m players gambling',type:BotStatus.ACTIVITY.WATCHING},status:BotStatus.STATUS.ONLINE},
 			offline: {activity:{name:'the sounds of a dead server',type:BotStatus.ACTIVITY.LISTENING},status:BotStatus.STATUS.DND}
-		}
+		},
+		api_state: [
+			':red_circle: `%v`' // offline or unreachable
+			':green_circle: `%v`', // online
+		],
+		bot_state: {
+			/* 
+			 * The message which will be displayed as response to the command 'status'.
+			 * 
+			 * %s = status
+			 * %l = locked
+			 * %a = activity
+			 */
+			frame: '%s %l `%a`',
+			status: {
+				online: ':green_circle:',
+				idle: ':crescent_moon:',
+				offline: ':black_circle:',
+				dnd: ':no_entry:'
+			},
+			locked: [
+				':unlock:',
+				':lock:'
+			]
+		},
+		server_state: [
+			':red_circle:', // offline or unreachable
+			':green_circle:' // online
+		]
 	},
 	server: {
 		states: {
@@ -141,7 +193,8 @@ module.exports = {
 			 */
 			host: 'example.com', //@TODO
 			port: 25565 //@TODO
-		}
+		},
+		timeout: 3000
 	}
 };
 

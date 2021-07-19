@@ -21,18 +21,35 @@ if (Constants.dev === true){
 
 // methods
 function pingServer(callback) {
+	var timedOut = false;
+	var responded = false;
+	setTimeout(() => {
+		if (responded === false) {
+			timedOut = true;
+			callback(false, 'timeout');
+		}
+	}, Constants.server.timeout);
 	MinecraftPing.ping_fefd_udp(Constants.server.ping, (err, response) => {
 		if (err) {
 			logger.error(`Can't ping server: ${err}`);
-			callback(false, err);
+			if (timedOut === false) {
+				callback(false, err);
+				responded = true;
+			}
 		}
 		//else if (typeof response.playersOnline == 'number' && typeof response.maxPlayers == 'number' && typeof response.motd == 'string') {
 		else if (typeof response.numPlayers == 'number' && typeof response.maxPlayers == 'number' && typeof response.motd == 'string') {
-			callback(true, response);
+			if (timedOut === false) {
+				callback(true, response);
+				responded = true;
+			}
 		}
 		else {
 			logger.error(`Can't ping server: Unknown response`);
-			callback(false, response);
+			if (timedOut === false) {
+				callback(false, response);
+				responded = true;
+			}
 		}
 	});
 }
@@ -99,6 +116,34 @@ function handleCommand(msg) {
 				logger.info('Parsed help text');
 			}
 			sendResponse(msg, Constants.bot.commands.responses.types.info, Constants.bot.commands.responses.info.command_help);
+			break;
+		case 'ping':
+			sendResponse(msg, Constants.bot.commands.responses.types.info, Constants.bot.commands.responses.info.command_ping);
+			break;
+		case 'status':
+			sendResponse(msg, Constants.bot.commands.responses.types.info, Constants.bot.commands.responses.info.command_status_loading);
+			var status = Constants.bot.commands.responses.info.command_status
+					.replace(/%v/g, Constants.version)
+					.replace(/%b/g, Constants.bot.bot_state.frame
+							.replace(/%s/g, Constants.bot.bot_state.status[client.user.presence.status])
+							.replace(/%l/g, Constants.bot.bot_state.locked[Number(statusLocked)])
+							// no clue why, but ...activities[0]... returns the displayed activity
+							.replace(/%a/g, client.user.presence.activities[0].toString()));
+			httpsGetRequest(`${Constants.api.host}:${Constants.api.port}${Constants.api.basePath}?token=${Constants.api.token}&target=version`, (success, data) => {
+				status.replace(/%a/g, Constants.bot.api_state[Number(success && data === Constants.api.version)].replace(/%v/g, Constants.api.version));
+				pingServer((success, data) => {
+					status.replace(/%s/g, Constants.bot.server_state[Number(success)]);
+					sendResponse(msg, Constants.bot.commands.responses.types.info, status);
+				});
+			});
+			Https.get(`${Constants.api.host}:${Constants.api.port}${Constants.api.basePath}?token=${Constants.api.token}&target=version`, (res) => {
+				var data = '';
+				res.on('data', (d) => { data += d; });
+				res.on('end', () => {
+					
+				});
+			}).end();
+			sendResponse(msg, Constants.bot.commands.responses.types.info, status);
 			break;
 		case 'set':
 			if (args.length >= 3) {
