@@ -99,6 +99,8 @@ function updateBot(status) {
 	}
 	return true;
 }
+/*
+ * unused method; maybe useful for coming features...
 function httpsGetRequest(url, timeout, callback) {
 	var timedOut = false;
 	var responded = false;
@@ -119,6 +121,7 @@ function httpsGetRequest(url, timeout, callback) {
 		});
 	});
 }
+ */
 function handleCommand(msg) {
 	var args = msg.content.split(' ');
 	var cmd = args.shift().replace(Constants.bot.commands.prefix, '').toLowerCase();
@@ -145,16 +148,14 @@ function handleCommand(msg) {
 			var status = Constants.bot.commands.responses.info.command_status
 					.replace(/%v/g, Constants.version)
 					.replace(/%b/g, Constants.bot.bot_state.frame
-							.replace(/%s/g, Constants.bot.bot_state.status[client.user.presence.status])
+							.replace(/%s/g, Constants.bot.bot_state.status[(botAvailable ? client.user.presence.status : 'unknown')])
 							.replace(/%l/g, Constants.bot.bot_state.locked[Number(statusLocked)])
 							// no clue why, but ...activities[0]... returns the displayed activity
-							.replace(/%a/g, client.user.presence.activities[0].toString()));
-			httpsGetRequest(`https://${Constants.api.host}:${Constants.api.port}${Constants.api.basePath}?token=${Constants.api.token}&target=version`, Constants.api.timeout, (success, data) => {
-				status = status.replace(/%a/g, Constants.bot.api_state[Number(success && data === Constants.api.version)].replace(/%v/g, Constants.api.version));
-				pingServer((success, data) => {
-					status = status.replace(/%s/g, Constants.bot.server_state[Number(success)]);
-					sendResponse(msg, Constants.bot.commands.responses.types.info, status);
-				});
+							.replace(/%a/g, client.user.presence.activities[0].toString()))
+					.replace(/%a/g, Constants.bot.api_state[Number(server.listening)].replace(/%v/g, Constants.api.version));
+			pingServer((success, data) => {
+				status = status.replace(/%s/g, Constants.bot.server_state[Number(success)]);
+				sendResponse(msg, Constants.bot.commands.responses.types.info, status);
 			});
 			break;
 		case 'set':

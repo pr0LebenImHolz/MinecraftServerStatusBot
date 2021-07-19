@@ -169,7 +169,8 @@ module.exports = {
 				online: ':green_circle:',
 				idle: ':crescent_moon:',
 				offline: ':black_circle:',
-				dnd: ':no_entry:'
+				dnd: ':no_entry:',
+				unknown: ':question:'
 			},
 			locked: [
 				':unlock:',
