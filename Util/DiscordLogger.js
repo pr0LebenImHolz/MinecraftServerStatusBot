@@ -4,7 +4,7 @@ class DiscordLogger {
 		this.channels = channels;
 	}
 	
-	function log(level, message) {
+	log(level, message) {
 		if (this.level <= level) this.channels.forEach((channel) => {
 			channel.send(message);
 		});
