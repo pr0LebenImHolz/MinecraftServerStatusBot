@@ -4,6 +4,7 @@ const Constants = require('./Constants.js');
 // libs
 const BotStatus = require('./Util/BotStatus.js');
 const Logger = require('./Util/Logger.js');
+const DiscordLogger = require('./Util/DiscordLogger.js');
 const Discord = require('discord.js');
 const Https = require('https');
 const Fs = require('fs');
@@ -11,6 +12,7 @@ const MinecraftPing = require('minecraft-ping');
 
 // init
 const logger = new Logger(Constants.logging.level, Constants.logging.basedir);
+const discordLogger = new DiscordLogger(Constants.bot.logging_level, []);
 const client = new Discord.Client();
 
 // dev overwrites
@@ -212,12 +214,21 @@ function handleCommand(msg) {
 		default:
 			sendResponse(msg, Constants.bot.commands.responses.types.error, Constants.bot.commands.responses.error.unknown_command);
 			break;
-	} 
+	}
+	var fullCommand = args;
+	fullCommand[0] = fullCommand[0].replace(Constants.bot.commands.prefix, '');
+	fullCommand = fullCommand.join(' ');
+	discordLogger.log(DiscordLogger.LogLevels.EVERYTHING, Constants.bot.logging.messages.used_command_successfully.replace(/%u/g, msg.author.toString()).replace(/%m/g, fullCommand).replace(/%c/g, cmd));
 }
 function sendResponse(msg, type, response) {
 	msg.channel.send(response);
 }
+function logNewServerStateToDiscord(status) {
+	if (botAvailable && Object.values(Constants.server.states).indexOf(status) != -1) discordLogger.log((oldServerState != status && status != Constants.server.states.running) ? DiscordLogger.LogLevels.API_SERVER : DiscordLogger.LogLevels.API_EVERYTHING, Constants.bot.logging.messages.server_updated.replace(/%o/g,oldServerState).replace(/%n/g, status));
+	oldServerState = status;
+}
 
+var oldServerState = null;
 var botAvailable = false;
 var helpParsed = false;
 var statusLocked = false;
@@ -226,6 +237,10 @@ logger.info(`Initialized Script ${Constants.version}`);
 
 // bot callbacks
 client.once('ready', () => {
+	var channels = [];
+	Constants.bot.logging_channels.forEach((id) => { channels.push(client.channels.get(id)); });
+	discordLogger.setChannels(channels);
+	discordLogger.log(DiscordLogger.LogLevels.BOT, 'Bot Ready');
 	logger.info(`Logged in as ${client.user.tag}`);
 	botAvailable = true;
 	updateBot(Constants.server.states.stopped);
@@ -243,6 +258,7 @@ client.on('message', msg => {
 		}
 		// When the message was send on a DM or the member is not in the whitelisted roles
 		sendResponse(msg, Constants.bot.commands.responses.types.error, Constants.bot.commands.responses.error.insufficient_permission);
+		commandExecuted(false);
 	}
 });
 
@@ -274,6 +290,7 @@ var server = Https.createServer({key: Fs.readFileSync(Constants.tls.key), cert: 
 								case 'update':
 									var status = url.searchParams.get('status');
 									if (typeof status === 'string') {
+										logNewServerStateToDiscord(status);
 										var response = updateBot(status);
 										res.writeHead(response === true ? 204 : 503);
 										res.end();

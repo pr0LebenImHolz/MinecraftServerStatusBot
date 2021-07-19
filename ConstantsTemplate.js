@@ -62,13 +62,39 @@ module.exports = {
 		 * The discord bot token
 		 */
 		token: 'hippopotomonstrosesquippedaliophobia', //@TODO
+		logging: {
+			/*
+			 * The IDs (Snowflake) of the channels where the bot should log
+			 */
+			channels: [ //@TODO
+			],
+			/*
+			 * 0 Events triggered by the Bot and API: commands, server starting/ started/ stopping/ stopped, player joined/ left (Don't use this in production)
+			 * 1 Events triggered by the API: server starting/ started/ stopping/ stopped, player joined/ left
+			 * 2 Events triggered by the API: server starting/ started/ stopping/ stopped
+			 */
+			level: 0, //@TODO
+			messages: {
+				/*
+				 * %u The user who used the command
+				 * %m The whole message of the user (without prefix)
+				 * %c Only the command (first word of the message)
+				 */ 
+				used_command_successfully: '`%u` has executed command `%m` successfully',
+				/*
+				 * %o The old (cached) server state
+				 * %n The new server state
+				 */
+				server_updated: 'Server state has changed from `%o` to `%n`'
+			}
+		},
 		commands: {
 			prefix: '!', //@TODO
 			help_command: 'help',
 			/*
 			 * The IDs of all roles which can interact with the bot
 			 */
-			roles: [
+			roles: [ //@TODO
 			],
 			commands: {
 				'help': {
