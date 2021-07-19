@@ -222,7 +222,7 @@ var botAvailable = false;
 var helpParsed = false;
 var statusLocked = false;
 
-logger.info(`Initialized Script`);
+logger.info(`Initialized Script ${Constants.version}`);
 
 // bot callbacks
 client.once('ready', () => {
