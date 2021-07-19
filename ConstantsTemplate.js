@@ -76,11 +76,12 @@ module.exports = {
 			level: 0, //@TODO
 			messages: {
 				/*
-				 * %u The user who used the command
+				 * %u The user who executed the command (using Discord.User.toString() - This will mention the user)
+				 * %U The user who executed the command (using `${Discord.User.username}#${Discord.User.discriminator}` - This won't mention the user)
 				 * %m The whole message of the user (without prefix)
 				 * %c Only the command (first word of the message)
 				 */ 
-				used_command_successfully: '`%u` has executed command `%m` successfully',
+				used_command_successfully: '`%U` has executed command `%m` successfully',
 				/*
 				 * %o The old (cached) server state
 				 * %n The new server state

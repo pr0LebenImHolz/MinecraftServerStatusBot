@@ -217,7 +217,7 @@ function handleCommand(msg) {
 			sendResponse(msg, Constants.bot.commands.responses.types.error, Constants.bot.commands.responses.error.unknown_command);
 			break;
 	}
-	discordLogger.log(DiscordLogger.LogLevels.EVERYTHING, Constants.bot.logging.messages.used_command_successfully.replace(/%u/g, msg.author.toString()).replace(/%m/g, fullCommand).replace(/%c/g, cmd));
+	discordLogger.log(DiscordLogger.LogLevels.EVERYTHING, Constants.bot.logging.messages.used_command_successfully.replace(/%u/g, msg.author.toString()).replace(/%U/g, `${msg.author.username}#${msg.author.discriminator}`).replace(/%m/g, fullCommand).replace(/%c/g, cmd));
 }
 function sendResponse(msg, type, response) {
 	msg.channel.send(response);
