@@ -70,8 +70,7 @@ module.exports = {
 			],
 			/*
 			 * 0 Events triggered by the Bot and API: commands, server starting/ started/ stopping/ stopped, player joined/ left (Don't use this in production)
-			 * 1 Events triggered by the API: server starting/ started/ stopping/ stopped, player joined/ left
-			 * 2 Events triggered by the API: server starting/ started/ stopping/ stopped
+			 * 1 Events triggered by the API: server starting/ started/ stopping/ stopped
 			 */
 			level: 0, //@TODO
 			messages: {

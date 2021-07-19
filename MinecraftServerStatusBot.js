@@ -223,7 +223,7 @@ function sendResponse(msg, type, response) {
 	msg.channel.send(response);
 }
 function logNewServerStateToDiscord(status) {
-	if (botAvailable && Object.values(Constants.server.states).indexOf(status) != -1) discordLogger.log((oldServerState != status && status != Constants.server.states.running) ? DiscordLogger.LogLevels.API_SERVER : DiscordLogger.LogLevels.API_EVERYTHING, Constants.bot.logging.messages.server_updated.replace(/%o/g,oldServerState).replace(/%n/g, status));
+	if (botAvailable && Object.values(Constants.server.states).indexOf(status) != -1 && oldServerState != status) discordLogger.log(DiscordLogger.LogLevels.API, Constants.bot.logging.messages.server_updated.replace(/%o/g,oldServerState).replace(/%n/g, status));
 	oldServerState = status;
 }
 
