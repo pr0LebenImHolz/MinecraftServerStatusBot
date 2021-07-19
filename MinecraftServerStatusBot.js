@@ -150,9 +150,9 @@ function handleCommand(msg) {
 							// no clue why, but ...activities[0]... returns the displayed activity
 							.replace(/%a/g, client.user.presence.activities[0].toString()));
 			httpsGetRequest(`https://${Constants.api.host}:${Constants.api.port}${Constants.api.basePath}?token=${Constants.api.token}&target=version`, Constants.api.timeout, (success, data) => {
-				status.replace(/%a/g, Constants.bot.api_state[Number(success && data === Constants.api.version)].replace(/%v/g, Constants.api.version));
+				status = status.replace(/%a/g, Constants.bot.api_state[Number(success && data === Constants.api.version)].replace(/%v/g, Constants.api.version));
 				pingServer((success, data) => {
-					status.replace(/%s/g, Constants.bot.server_state[Number(success)]);
+					status = status.replace(/%s/g, Constants.bot.server_state[Number(success)]);
 					sendResponse(msg, Constants.bot.commands.responses.types.info, status);
 				});
 			});
