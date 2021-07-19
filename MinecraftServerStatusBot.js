@@ -21,18 +21,35 @@ if (Constants.dev === true){
 
 // methods
 function pingServer(callback) {
+	var timedOut = false;
+	var responded = false;
+	setTimeout(() => {
+		if (responded === false) {
+			timedOut = true;
+			callback(false, 'timeout');
+		}
+	}, Constants.server.timeout);
 	MinecraftPing.ping_fefd_udp(Constants.server.ping, (err, response) => {
 		if (err) {
 			logger.error(`Can't ping server: ${err}`);
-			callback(false, err);
+			if (timedOut === false) {
+				callback(false, err);
+				responded = true;
+			}
 		}
 		//else if (typeof response.playersOnline == 'number' && typeof response.maxPlayers == 'number' && typeof response.motd == 'string') {
 		else if (typeof response.numPlayers == 'number' && typeof response.maxPlayers == 'number' && typeof response.motd == 'string') {
-			callback(true, response);
+			if (timedOut === false) {
+				callback(true, response);
+				responded = true;
+			}
 		}
 		else {
 			logger.error(`Can't ping server: Unknown response`);
-			callback(false, response);
+			if (timedOut === false) {
+				callback(false, response);
+				responded = true;
+			}
 		}
 	});
 }
@@ -82,6 +99,29 @@ function updateBot(status) {
 	}
 	return true;
 }
+/*
+ * unused method; maybe useful for coming features...
+function httpsGetRequest(url, timeout, callback) {
+	var timedOut = false;
+	var responded = false;
+	setTimeout(() => {
+		if (responded === false) {
+			timedOut = true;
+			callback(false, 'timeout');
+		}
+	}, timeout);
+	Https.get(url, (res) => {
+		var data = '';
+		res.on('data', (d) => { data += d; });
+		res.on('end', () => {
+			if (timedOut === false) {
+				callback(true, data);
+				responded = true;
+			}
+		});
+	});
+}
+ */
 function handleCommand(msg) {
 	var args = msg.content.split(' ');
 	var cmd = args.shift().replace(Constants.bot.commands.prefix, '').toLowerCase();
@@ -99,6 +139,24 @@ function handleCommand(msg) {
 				logger.info('Parsed help text');
 			}
 			sendResponse(msg, Constants.bot.commands.responses.types.info, Constants.bot.commands.responses.info.command_help);
+			break;
+		case 'ping':
+			sendResponse(msg, Constants.bot.commands.responses.types.info, Constants.bot.commands.responses.info.command_ping);
+			break;
+		case 'status':
+			sendResponse(msg, Constants.bot.commands.responses.types.info, Constants.bot.commands.responses.info.command_status_loading);
+			var status = Constants.bot.commands.responses.info.command_status
+					.replace(/%v/g, Constants.version)
+					.replace(/%b/g, Constants.bot.bot_state.frame
+							.replace(/%s/g, Constants.bot.bot_state.status[(botAvailable ? client.user.presence.status : 'unknown')])
+							.replace(/%l/g, Constants.bot.bot_state.locked[Number(statusLocked)])
+							// no clue why, but ...activities[0]... returns the displayed activity
+							.replace(/%a/g, client.user.presence.activities[0].toString()))
+					.replace(/%a/g, Constants.bot.api_state[Number(server.listening)].replace(/%v/g, Constants.api.version));
+			pingServer((success, data) => {
+				status = status.replace(/%s/g, Constants.bot.server_state[Number(success)]);
+				sendResponse(msg, Constants.bot.commands.responses.types.info, status);
+			});
 			break;
 		case 'set':
 			if (args.length >= 3) {
