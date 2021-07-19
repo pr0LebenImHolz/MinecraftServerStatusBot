@@ -238,7 +238,7 @@ logger.info(`Initialized Script ${Constants.version}`);
 // bot callbacks
 client.once('ready', () => {
 	var channels = [];
-	Constants.bot.logging.channels.forEach((id) => { channels.push(client.channels.get(id)); });
+	Constants.bot.logging.channels.forEach((id) => { channels.push(client.channels.cache.get(id)); });
 	discordLogger.setChannels(channels);
 	discordLogger.log(DiscordLogger.LogLevels.BOT, 'Bot Ready');
 	logger.info(`Logged in as ${client.user.tag}`);
