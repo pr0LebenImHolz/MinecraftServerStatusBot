@@ -12,7 +12,7 @@ const MinecraftPing = require('minecraft-ping');
 
 // init
 const logger = new Logger(Constants.logging.level, Constants.logging.basedir);
-const discordLogger = new DiscordLogger(Constants.bot.logging_level, []);
+const discordLogger = new DiscordLogger(Constants.bot.logging.level, []);
 const client = new Discord.Client();
 
 // dev overwrites
@@ -238,7 +238,7 @@ logger.info(`Initialized Script ${Constants.version}`);
 // bot callbacks
 client.once('ready', () => {
 	var channels = [];
-	Constants.bot.logging_channels.forEach((id) => { channels.push(client.channels.get(id)); });
+	Constants.bot.logging.channels.forEach((id) => { channels.push(client.channels.get(id)); });
 	discordLogger.setChannels(channels);
 	discordLogger.log(DiscordLogger.LogLevels.BOT, 'Bot Ready');
 	logger.info(`Logged in as ${client.user.tag}`);
