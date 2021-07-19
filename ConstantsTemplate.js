@@ -71,6 +71,10 @@ module.exports = {
 			roles: [
 			],
 			commands: {
+				'help': {
+					syntax: '',
+					description: 'Shows this help'
+				},
 				'ping': {
 					syntax: '',
 					description: 'Testcommand to check if the bot is still running'

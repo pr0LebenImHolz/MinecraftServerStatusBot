@@ -15,6 +15,9 @@ This DiscordBot uses the [MinecraftStatusUpdater](https://github.com/pr0LebenImH
 
 ## Bot Commands
 
+- help: Shows this help
+- ping: Testcommand to check if the bot is still running
+- status: Shows the current status of the bot and some other useful information
 - set `[status] [activity type] [activity]`: Sets the status of the bot until the server overwrites it
 - lock: Locks the current activity so the server can\'t overwrite it (`set` will still work)
 - unlock: Unlocks the current activity so the server can overwrite it again
