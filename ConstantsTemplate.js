@@ -69,7 +69,7 @@ module.exports = {
 			channels: [ //@TODO
 			],
 			/*
-			 * 0 Events triggered by the Bot and API: commands, server starting/ started/ stopping/ stopped, player joined/ left (Don't use this in production)
+			 * 0 Events triggered by the Bot and API: successfull commands, server starting/ started/ stopping/ stopped
 			 * 1 Events triggered by the API: server starting/ started/ stopping/ stopped
 			 */
 			level: 0, //@TODO
