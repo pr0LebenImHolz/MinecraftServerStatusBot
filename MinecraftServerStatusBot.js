@@ -223,8 +223,10 @@ function sendResponse(msg, type, response) {
 	msg.channel.send(response);
 }
 function logNewServerStateToDiscord(status) {
-	if (botAvailable && Object.values(Constants.server.states).indexOf(status) != -1 && oldServerState != status) discordLogger.log(DiscordLogger.LogLevels.API, Constants.bot.logging.messages.server_updated.replace(/%o/g,oldServerState).replace(/%n/g, status));
-	oldServerState = status;
+	if (botAvailable && Object.values(Constants.server.states).indexOf(status) != -1 && oldServerState != status) {
+		discordLogger.log(DiscordLogger.LogLevels.API, Constants.bot.logging.messages.server_updated.replace(/%o/g,oldServerState).replace(/%n/g, status));
+		oldServerState = status;
+	}
 }
 
 var oldServerState = null;
