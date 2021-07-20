@@ -12,7 +12,7 @@ const MinecraftPing = require('minecraft-ping');
 
 // init
 const logger = new Logger(Constants.logging.level, Constants.logging.basedir);
-const discordLogger = new DiscordLogger(Constants.bot.logging.level, []);
+const discordLogger = new DiscordLogger(Constants.bot.logging.level, Constants.bot.logging.planned_api_requests, []);
 const client = new Discord.Client();
 
 // dev overwrites

@@ -86,7 +86,31 @@ module.exports = {
 				 * %n The new server state
 				 */
 				server_updated: 'Server state has changed from `%o` to `%n`'
-			}
+			},
+			/*
+			 * Defines planned API requests from the server.
+			 * All API requests within this time won't be logged to avoid spam.
+			 * 
+			 * Syntax:  yyyy-mm-ddThh:mm:ssTtolerance
+			 * Default: xxxx-xx-xxT03:00:00T300 // every day from (including) 02:57:31 to (including) 03:02:29
+			 * 
+			 * - yyyy:      Year (e.g. 2021; /^([0-9]{4}|x|xxxx)$/i)
+			 * - -:         Separator
+			 * - mm:        Month (e.g. 01, 12; /^((0[0-9])|(1[0-2])|x|xxxx)$/i)
+			 * - -:         Separator
+			 * - dd:        Day (e.g. 01, 31; /^(([0-2][0-9])|(3[0-1])|x|xxxx)$/i)
+			 * - T:         Separator
+			 * - hh:        Hour (e.g. 00, 23; /^(([0-1][0-9])|(2[0-3])|x|xxxx)$/i)
+			 * - ::         Separator
+			 * - mm:        Minute (e.g. 00, 59; /^(([0-5][0-9])|x|xxxx)$/i)
+			 * - ::         Separator
+			 * - ss:        Second (e.g. 00, 59; /^(([0-5][0-9])|x|xxxx)$/i)
+			 * - T:         Separator
+			 * - tolerance: Offset in seconds; The bot won't log anything to the defined channels in this timespan
+			 */
+			planned_api_requests: [
+				'XXXX-XX-XXT03:00:00T300'
+			]
 		},
 		commands: {
 			prefix: '!', //@TODO
