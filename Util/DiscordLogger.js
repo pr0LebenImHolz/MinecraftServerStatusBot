@@ -89,9 +89,6 @@ class DiscordLogger {
 			// Calculate current timestamp in seconds
 			current = Math.floor(current.getTime() / 1000);
 			// When the current timestamp is not
-			console.log(current);
-			console.log(min);
-			console.log(max);
 			if (current > min && current < max) return false;
 		};
 		return true;
