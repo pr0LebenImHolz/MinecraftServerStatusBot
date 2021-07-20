@@ -71,7 +71,7 @@ class DiscordLogger {
 		return parsedTimes;
 	}
 	
-	_isLoggingAllowedAtThisTime(current) {
+	_isLoggingAllowedAtThisTime() {
 		function _leadingZero(number) {
 			if (number < 0) throw new Error('InvalidStateException: ${number}');
 			if (number < 10) return `0${number}`;
@@ -80,7 +80,7 @@ class DiscordLogger {
 		for (var i = 0; i < this._plannedApiRequests.length; i++) {
 			var plannedApiRequest = this._plannedApiRequests[i];
 			// Get current date
-			//var current = new Date('2021-07-20T03:00:00');
+			var current = new Date('2021-07-20T03:00:00');
 			// Get minimum timestamp in seconds when logging is not allowed
 			var min = Math.floor((new Date(`${plannedApiRequest.year == null ? current.getFullYear() : plannedApiRequest.year}-${plannedApiRequest.month == null ? _leadingZero(current.getMonth() + 1) : plannedApiRequest.month}-${plannedApiRequest.day == null ? _leadingZero(current.getDate()) : plannedApiRequest.day}T${plannedApiRequest.hour == null ? _leadingZero(current.getHours()) : plannedApiRequest.hour}:${plannedApiRequest.minute == null ? _leadingZero(current.getMinutes()) : plannedApiRequest.minute}:${plannedApiRequest.second == null ? _leadingZero(current.getSeconds()) : plannedApiRequest.second}`)).getTime() / 1000);
 			min -= plannedApiRequest.tolerance / 2;
