@@ -20,7 +20,7 @@ module.exports = {
 		 * 2 LOG
 		 * 3 ERROR
 		 */
-		level: 0, //@TODO
+		level: 1, //@TODO
 		/*
 		 * The directory to cut of all log messages (the parent directory of the main class should be fine)
 		 * working dir (parent dir of main class): `${process.cwd()}/`
@@ -51,11 +51,7 @@ module.exports = {
 		/* 
 		 * API Version - will be returned so the Mod can check (compare) them
 		 */
-		version: '1.0.0',
-		/*
-		 * timeout when this script calls the api (this happens when the command 'status' is triggered)
-		 */
-		timeout: 3000
+		version: '1.0.0'
 	},
 	bot: {
 		/*
@@ -178,6 +174,7 @@ module.exports = {
 					success: 2
 				},
 				error: {
+					alias_aborted: 'Execution of aliases aborted due to incorrect configuration.',
 					insufficient_permission: 'You don\'t have the permission to do that!',
 					internal: 'Oups, anything went terribly wrong here...',
 					unknown_command: 'Unknown command!',
@@ -191,7 +188,11 @@ module.exports = {
 				},
 				info: {
 					command_reload: 'Reloading server status...',
-					command_help: '__**HELP**__\n%h'
+					/*
+					 * %c list of all commands
+					 * %a list of all aliases
+					 */
+					command_help: '__**HELP**__\n__**Commands:**__\n%c\n__**Aliases:**__\n%a'
 					command_ping: 'Pong!',
 					/* 
 					 * %v = program version
