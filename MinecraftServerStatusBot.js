@@ -249,7 +249,7 @@ client.on('message', msg => {
 			for (id of Constants.bot.commands.roles) {
 				if (msg.member.roles.cache.has(id)) {
 					var success;
-					var cmd = msg.content.toLowerCase();
+					var cmd = msg.content.replace(Constants.bot.commands.prefix, '').toLowerCase();
 					if (Object.keys(Constants.bot.commands.aliases).indexOf(cmd) != -1) {
 						success = true;
 						for (var i = 0; i < Constants.bot.commands.aliases[cmd].length; i++) {
