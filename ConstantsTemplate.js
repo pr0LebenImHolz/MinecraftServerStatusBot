@@ -139,8 +139,8 @@ module.exports = {
 			 *   description: 'Unlocks and Reloads the activity'
 			 * }
 			 */
-			aliases: [
-			]
+			aliases: {
+			},
 			commands: {
 				'help': {
 					syntax: '',

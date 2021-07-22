@@ -257,7 +257,7 @@ client.on('message', msg => {
 							var aliasCmd = aliasArgs.shift();
 							success = handleCommand(msg, aliasCmd, aliasArgs);
 							if (!success) {
-								sendResponse(msg, Constants.bot.commands.responses.types.error, Constants.bot.commands.responses.error.alias_aborted;
+								sendResponse(msg, Constants.bot.commands.responses.types.error, Constants.bot.commands.responses.error.alias_aborted);
 								logger.error(`Aborted alias execution of '${cmd}' at position ${i} (${aliasCmd}). Please check your configuration`);
 								break;
 							}
