@@ -129,12 +129,16 @@ function handleCommand(msg, cmd, args) {
 		case 'help':
 			if (!helpParsed) {
 				logger.info('Parsing help text...');
-				let helpText = '';
+				let commands = '';
+				let aliases = '';
 				let q = '`';
 				Object.keys(Constants.bot.commands.commands).forEach((k) => {
-					helpText += `**${k}**\n> ${Constants.bot.commands.commands[k].syntax.length == 0 ? '' : q + Constants.bot.commands.commands[k].syntax + q + ' '}${Constants.bot.commands.commands[k].description}\n`;
+					commands += `**${k}**\n> ${Constants.bot.commands.commands[k].syntax.length == 0 ? '' : q + Constants.bot.commands.commands[k].syntax + q + ' '}${Constants.bot.commands.commands[k].description}\n`;
 				});
-				Constants.bot.commands.responses.info.command_help = Constants.bot.commands.responses.info.command_help.replace(/%h/g, helpText);
+				Object.keys(Constants.bot.commands.aliases).forEach((k) => {
+					aliases += `**${k}**\n> ${Constants.bot.commands.aliases[k].description}\n`
+				});
+				Constants.bot.commands.responses.info.command_help = Constants.bot.commands.responses.info.command_help.replace(/%c/g, commands).replace(/%a/g, aliases);
 				helpParsed = true;
 				logger.info('Parsed help text');
 			}
@@ -252,8 +256,8 @@ client.on('message', msg => {
 					var cmd = msg.content.replace(Constants.bot.commands.prefix, '').toLowerCase();
 					if (Object.keys(Constants.bot.commands.aliases).indexOf(cmd) != -1) {
 						success = true;
-						for (var i = 0; i < Constants.bot.commands.aliases[cmd].length; i++) {
-							var aliasArgs = Constants.bot.commands.aliases[cmd][i].split(' ');
+						for (var i = 0; i < Constants.bot.commands.aliases[cmd].commands.length; i++) {
+							var aliasArgs = Constants.bot.commands.aliases[cmd].commands[i].split(' ');
 							var aliasCmd = aliasArgs.shift();
 							success = handleCommand(msg, aliasCmd, aliasArgs);
 							if (!success) {
