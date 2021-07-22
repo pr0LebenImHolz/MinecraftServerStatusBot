@@ -120,6 +120,27 @@ module.exports = {
 			 */
 			roles: [ //@TODO
 			],
+			/*
+			 * Aliases are basically key value pairs where the key is the alias and the value is an array which will be processed in the configured order.
+			 * 
+			 * Note that the aliases must not be named the same as a command.
+			 * 
+			 * e.g.:
+			 * 'backup': {
+			 *   commands: ['lock', 'set dnd watching watches the backup...'],
+			 *   description: 'Sets and locks the activity. Reason: backups'
+			 * },
+			 * 'mainetance': {
+			 *   commands: ['lock', 'set dnd watching maintenance work...']
+			 *   description: 'Sets and locks the activity. Reason: mainetance work'
+			 * },
+			 * 'clearstate': {
+			 *   commands: ['unlock', 'reload']
+			 *   description: 'Unlocks and Reloads the activity'
+			 * }
+			 */
+			aliases: [
+			]
 			commands: {
 				'help': {
 					syntax: '',
@@ -134,7 +155,7 @@ module.exports = {
 					description: 'Shows the current status of the bot and some other useful information'
 				},
 				'set': {
-					syntax: '[status] [activity type] [activity]',
+					syntax: '[status] [activity type] [activity...]',
 					description: 'Sets the status of the bot until the server overwrites it'
 				},
 				'lock': {
@@ -147,7 +168,7 @@ module.exports = {
 				},
 				'reload': {
 					syntax: '',
-					description: 'Force reload (i.e. pings the server)'
+					description: 'Force reload (i.e. pings the server). The lockdown of the activity will *not* be affected at this!'
 				}
 			},
 			responses: {

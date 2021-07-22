@@ -124,11 +124,7 @@ function httpsGetRequest(url, timeout, callback) {
 	});
 }
  */
-function handleCommand(msg) {
-	var fullCommand = args = msg.content.split(' ');
-	fullCommand[0] = fullCommand[0].replace(Constants.bot.commands.prefix, '');
-	fullCommand = fullCommand.join(' ');
-	var cmd = args.shift().replace(Constants.bot.commands.prefix, '').toLowerCase();
+function handleCommand(msg, cmd, args) {
 	switch (cmd) {
 		case 'help':
 			if (!helpParsed) {
@@ -143,10 +139,10 @@ function handleCommand(msg) {
 				logger.info('Parsed help text');
 			}
 			sendResponse(msg, Constants.bot.commands.responses.types.info, Constants.bot.commands.responses.info.command_help);
-			break;
+			return true;
 		case 'ping':
 			sendResponse(msg, Constants.bot.commands.responses.types.info, Constants.bot.commands.responses.info.command_ping);
-			break;
+			return true;
 		case 'status':
 			sendResponse(msg, Constants.bot.commands.responses.types.info, Constants.bot.commands.responses.info.command_status_loading);
 			var status = Constants.bot.commands.responses.info.command_status
@@ -161,18 +157,18 @@ function handleCommand(msg) {
 				status = status.replace(/%s/g, Constants.bot.server_state[Number(success)]);
 				sendResponse(msg, Constants.bot.commands.responses.types.info, status);
 			});
-			break;
+			return true;
 		case 'set':
 			if (args.length >= 3) {
 				args[0] = args[0].toUpperCase();
 				args[1] = args[1].toUpperCase();
 				if (Object.keys(BotStatus.STATUS).indexOf(args[0]) == -1) {
 					sendResponse(msg, Constants.bot.commands.responses.error, Constants.bot.commands.responses.error.command_set_unknown_status);
-					break;
+					return false;
 				}
 				if (Object.keys(BotStatus.ACTIVITY).indexOf(args[1]) == -1) {
 					sendResponse(msg, Constants.bot.commands.responses.error, Constants.bot.commands.responses.error.command_set_unknown_activity);
-					break;
+					return false;
 				}
 				let activity = {status:BotStatus.STATUS[args.shift()],activity:{type:BotStatus.ACTIVITY[args.shift()],name:args.join(' ')}};
 				client.user.setPresence(activity).then(() => {
@@ -182,21 +178,21 @@ function handleCommand(msg) {
 			else {
 				sendResponse(msg, Constants.bot.commands.responses.types.error, Constants.bot.commands.responses.error.illegal_arguments.replace(/%c/g, cmd).replace(/%a/g, Constants.bot.commands.commands[cmd].syntax));
 			}
-			break;
+			return true;
 		case 'lock':
 			statusLocked = true;
 			sendResponse(msg, Constants.bot.commands.responses.types.success, Constants.bot.commands.responses.success.command_lock);
-			break;
+			return true;
 		case 'unlock':
 			statusLocked = false;
 			sendResponse(msg, Constants.bot.commands.responses.types.success, Constants.bot.commands.responses.success.command_unlock);
-			break;
+			return true;
 		case 'reload':
 			pingServer((success, response) => {
 				var activity;
 				if (success) {
 					activity = {
-						activity:{
+						activity: {
 							//name: Constants.bot.activities.running_2.activity.name.replace(/%c/g, response.playersOnline).replace(/%m/g, response.maxPlayers).replace(/%d/g, response.motd),
 							name: Constants.bot.activities.running_2.activity.name.replace(/%c/g, response.numPlayers).replace(/%m/g, response.maxPlayers).replace(/%d/g, response.motd),
 							type: Constants.bot.activities.running_2.activity.type
@@ -212,12 +208,12 @@ function handleCommand(msg) {
 				}
 				client.user.setPresence(activity);
 			});
-			break;
+			return true;
 		default:
 			sendResponse(msg, Constants.bot.commands.responses.types.error, Constants.bot.commands.responses.error.unknown_command);
-			break;
+			return false;
 	}
-	discordLogger.log(DiscordLogger.LogLevels.EVERYTHING, Constants.bot.logging.messages.used_command_successfully.replace(/%u/g, msg.author.toString()).replace(/%U/g, `${msg.author.username}#${msg.author.discriminator}`).replace(/%m/g, fullCommand).replace(/%c/g, cmd));
+	throw new Error('IllegalStateException');
 }
 function sendResponse(msg, type, response) {
 	msg.channel.send(response);
@@ -252,7 +248,29 @@ client.on('message', msg => {
 		if (msg.guild != null) {
 			for (id of Constants.bot.commands.roles) {
 				if (msg.member.roles.cache.has(id)) {
-					handleCommand(msg);
+					var success;
+					var cmd = msg.content.toLowerCase();
+					if (Object.keys(Constants.bot.commands.aliases).indexOf(cmd) != -1) {
+						success = true;
+						for (var i = 0; i < Constants.bot.commands.aliases[cmd].length; i++) {
+							var aliasArgs = Constants.bot.commands.aliases[cmd][i].split(' ');
+							var aliasCmd = aliasArgs.shift();
+							success = handleCommand(msg, aliasCmd, aliasArgs);
+							if (!success) {
+								sendResponse(msg, Constants.bot.commands.responses.types.error, Constants.bot.commands.responses.error.alias_aborted;
+								logger.error(`Aborted alias execution of '${cmd}' at position ${i} (${aliasCmd}). Please check your configuration`);
+								break;
+							}
+						}
+					}
+					else {
+						var fullCommand = args = msg.content.split(' ');
+						fullCommand[0] = fullCommand[0].replace(Constants.bot.commands.prefix, '');
+						fullCommand = fullCommand.join(' ');
+						cmd = args.shift().replace(Constants.bot.commands.prefix, '').toLowerCase();
+						success = handleCommand(msg, cmd, args);
+					}
+					if (success) discordLogger.log(DiscordLogger.LogLevels.EVERYTHING, Constants.bot.logging.messages.used_command_successfully.replace(/%u/g, msg.author.toString()).replace(/%U/g, `${msg.author.username}#${msg.author.discriminator}`).replace(/%m/g, fullCommand).replace(/%c/g, cmd));
 					return;
 				}
 			}
