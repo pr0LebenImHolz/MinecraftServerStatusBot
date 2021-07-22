@@ -20,7 +20,7 @@ module.exports = {
 		 * 2 LOG
 		 * 3 ERROR
 		 */
-		level: 0, //@TODO
+		level: 1, //@TODO
 		/*
 		 * The directory to cut of all log messages (the parent directory of the main class should be fine)
 		 * working dir (parent dir of main class): `${process.cwd()}/`
@@ -51,25 +51,92 @@ module.exports = {
 		/* 
 		 * API Version - will be returned so the Mod can check (compare) them
 		 */
-		version: '1.0.0',
-		/*
-		 * timeout when this script calls the api (this happens when the command 'status' is triggered)
-		 */
-		timeout: 3000
+		version: '1.0.0'
 	},
 	bot: {
 		/*
 		 * The discord bot token
 		 */
 		token: 'hippopotomonstrosesquippedaliophobia', //@TODO
+		logging: {
+			/*
+			 * The IDs (Snowflake) of the channels where the bot should log
+			 */
+			channels: [ //@TODO
+			],
+			/*
+			 * 0 Events triggered by the Bot and API: successfull commands, server starting/ started/ stopping/ stopped
+			 * 1 Events triggered by the API: server starting/ started/ stopping/ stopped
+			 */
+			level: 0, //@TODO
+			messages: {
+				/*
+				 * %u The user who executed the command (using Discord.User.toString() - This will mention the user)
+				 * %U The user who executed the command (using `${Discord.User.username}#${Discord.User.discriminator}` - This won't mention the user)
+				 * %m The whole message of the user (without prefix)
+				 * %c Only the command (first word of the message)
+				 */ 
+				used_command_successfully: '`%U` has executed command `%m` successfully',
+				/*
+				 * %o The old (cached) server state
+				 * %n The new server state
+				 */
+				server_updated: 'Server state has changed from `%o` to `%n`'
+			},
+			/*
+			 * Defines planned API requests from the server.
+			 * All API requests within this time won't be logged to avoid spam.
+			 * 
+			 * Syntax:  yyyy-mm-ddThh:mm:ssTtolerance
+			 * Default: xxxx-xx-xxT03:00:00T300 // every day from (including) 02:57:31 to (including) 03:02:29
+			 * 
+			 * - yyyy:      Year (e.g. 2021; /^([0-9]{4}|x|xxxx)$/i)
+			 * - -:         Separator
+			 * - mm:        Month (e.g. 01, 12; /^((0[0-9])|(1[0-2])|x|xxxx)$/i)
+			 * - -:         Separator
+			 * - dd:        Day (e.g. 01, 31; /^(([0-2][0-9])|(3[0-1])|x|xxxx)$/i)
+			 * - T:         Separator
+			 * - hh:        Hour (e.g. 00, 23; /^(([0-1][0-9])|(2[0-3])|x|xxxx)$/i)
+			 * - ::         Separator
+			 * - mm:        Minute (e.g. 00, 59; /^(([0-5][0-9])|x|xxxx)$/i)
+			 * - ::         Separator
+			 * - ss:        Second (e.g. 00, 59; /^(([0-5][0-9])|x|xxxx)$/i)
+			 * - T:         Separator
+			 * - tolerance: Offset in seconds; The bot won't log anything to the defined channels in this timespan
+			 */
+			planned_api_requests: [
+				'XXXX-XX-XXT03:00:00T300'
+			]
+		},
 		commands: {
 			prefix: '!', //@TODO
 			help_command: 'help',
 			/*
 			 * The IDs of all roles which can interact with the bot
 			 */
-			roles: [
+			roles: [ //@TODO
 			],
+			/*
+			 * Aliases are basically key value pairs where the key is the alias and the value is an array which will be processed in the configured order.
+			 * 
+			 * Note that the aliases must not be named the same as a command.
+			 * 
+			 * e.g.:
+			 * 'backup': {
+			 *   commands: ['lock', 'set dnd watching watches the backup...'],
+			 *   description: 'Sets and locks the activity. Reason: backups'
+			 * },
+			 * 'mainetance': {
+			 *   commands: ['lock', 'set dnd watching maintenance work...']
+			 *   description: 'Sets and locks the activity. Reason: mainetance work'
+			 * },
+			 * 'clearstate': {
+			 *   commands: ['unlock', 'reload']
+			 *   description: 'Unlocks and Reloads the activity'
+			 * }
+			 */
+			aliases: {
+			},
 			commands: {
 				'help': {
 					syntax: '',
@@ -84,7 +151,7 @@ module.exports = {
 					description: 'Shows the current status of the bot and some other useful information'
 				},
 				'set': {
-					syntax: '[status] [activity type] [activity]',
+					syntax: '[status] [activity type] [activity...]',
 					description: 'Sets the status of the bot until the server overwrites it'
 				},
 				'lock': {
@@ -97,7 +164,7 @@ module.exports = {
 				},
 				'reload': {
 					syntax: '',
-					description: 'Force reload (i.e. pings the server)'
+					description: 'Force reload (i.e. pings the server). The lockdown of the activity will *not* be affected at this!'
 				}
 			},
 			responses: {
@@ -107,6 +174,7 @@ module.exports = {
 					success: 2
 				},
 				error: {
+					alias_aborted: 'Execution of aliases aborted due to incorrect configuration.',
 					insufficient_permission: 'You don\'t have the permission to do that!',
 					internal: 'Oups, anything went terribly wrong here...',
 					unknown_command: 'Unknown command!',
@@ -120,7 +188,11 @@ module.exports = {
 				},
 				info: {
 					command_reload: 'Reloading server status...',
-					command_help: '__**HELP**__\n%h'
+					/*
+					 * %c list of all commands
+					 * %a list of all aliases
+					 */
+					command_help: '__**HELP**__\n__**Commands:**__\n%c\n__**Aliases:**__\n%a'
 					command_ping: 'Pong!',
 					/* 
 					 * %v = program version
