@@ -287,58 +287,64 @@ client.on('message', msg => {
 
 // init server
 var server = Https.createServer({key: Fs.readFileSync(Constants.tls.key), cert: Fs.readFileSync(Constants.tls.cert)}, (req, res) => {
-	var method = req.method;
-	var url = new URL(`https://${req.headers.host}${req.url}`);
-	logger.debug(`INCOMING REQUEST: [${method}] ${url}`);
-	if (url.hostname === Constants.api.host && url.port == Constants.api.port) {
-		if (url.searchParams.get('token') === Constants.api.token) {
-			switch (url.pathname) {
-				case Constants.api.basePath:
-					var target = url.searchParams.get('target');
-					switch (method) {
-						case 'GET':
-							switch (target) {
-								case 'version':
-									res.writeHead(200);
-									res.end(Constants.api.version);
-									break;
-								default:
-									res.writeHead(405);
-									res.end();
-									break;
-							}
-							break;
-						case 'POST':
-							switch (target) {
-								case 'update':
-									var status = url.searchParams.get('status');
-									if (typeof status === 'string') {
-										logNewServerStateToDiscord(status);
-										var response = updateBot(status);
-										res.writeHead(response === true ? 204 : 503);
+	if (req.httpVersion === '1.1') {
+		var method = req.method;
+		var url = new URL(`https://${req.headers.host}${req.url}`);
+		logger.debug(`INCOMING REQUEST: [${method}] ${url}`);
+		if (url.hostname === Constants.api.host && url.port == Constants.api.port) {
+			if (url.searchParams.get('token') === Constants.api.token) {
+				switch (url.pathname) {
+					case Constants.api.basePath:
+						var target = url.searchParams.get('target');
+						switch (method) {
+							case 'GET':
+								switch (target) {
+									case 'version':
+										res.writeHead(200);
+										res.end(Constants.api.version);
+										break;
+									default:
+										res.writeHead(405);
 										res.end();
 										break;
-									}
-								default:
-									res.writeHead(405);
-									res.end();
-									break;
-							}
-							break;
-						default:
-							res.writeHead(405);
-							res.end();
-							break;
-					}
-					break;
-				default:
-					res.writeHead(404);
-					res.end();
-					break;
+								}
+								break;
+							case 'POST':
+								switch (target) {
+									case 'update':
+										var status = url.searchParams.get('status');
+										if (typeof status === 'string') {
+											logNewServerStateToDiscord(status);
+											var response = updateBot(status);
+											res.writeHead(response === true ? 204 : 503);
+											res.end();
+											break;
+										}
+									default:
+										res.writeHead(405);
+										res.end();
+										break;
+								}
+								break;
+							default:
+								res.writeHead(405);
+								res.end();
+								break;
+						}
+						break;
+					default:
+						res.writeHead(404);
+						res.end();
+						break;
+				}
+			}
+			else {
+				res.writeHead(401, {'WWW-Authenticate': 'Bearer realm="Unauthorized", charset="UTF-8"'});
+				res.end();
 			}
 		}
 		else {
-			res.writeHead(401, {'WWW-Authenticate': 'Bearer realm="Unauthorized", charset="UTF-8"'});
+			res.writeHead(400);
 			res.end();
 		}
 	}
