@@ -7,7 +7,7 @@ module.exports = {
 	 * - pre (pre release)
 	 * - x.y.z (major.minor.patch)
 	 */
-	version: 'v1.0.0',
+	version: 'v1.0.1',
 	/*
 	 * Don't use this in production - this enables dev logging and some dev variables
 	 * @see MinecraftServerStatusBot.js:16 'dev overwrites'
