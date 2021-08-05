@@ -40,11 +40,17 @@ This DiscordBot uses the [MinecraftStatusUpdater](https://github.com/pr0LebenImH
 
 ## API
 
+Requests must be made using HTTP/1.1 and TLS. Also, the host and path specified in Constants.js must match the one in the HTTP header.
+
 The Bot provides following endpoints:
 
 ### Version
 
-[GET] `https://example.com:443/foo/bar?token=B&target=version`
+```HTTP
+GET /?token=X&target=version HTTP/1.1
+Host: example.com:8443
+```
+- X: API Token
 
 The Bot returns an HTTP 200 response with the API version in the response body without linebreaks:
 
@@ -52,7 +58,12 @@ The Bot returns an HTTP 200 response with the API version in the response body w
 
 ### Update
 
-[POST] `https://example.com:443/foo/bar?token=B&target=update&status=STARTING`
+```HTTP
+POST /?token=X&target=update&status=Y HTTP/1.1
+Host: example.com:8443
+```
+- X: API Token
+- Y: [Server State](#server-states)
 
 The Bot returns an HTTP 204 response with an empty response body.
 
