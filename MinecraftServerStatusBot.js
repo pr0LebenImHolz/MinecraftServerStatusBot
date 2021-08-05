@@ -287,7 +287,7 @@ client.on('message', msg => {
 
 // init server
 var server = Https.createServer({key: Fs.readFileSync(Constants.tls.key), cert: Fs.readFileSync(Constants.tls.cert)}, (req, res) => {
-	if (req.httpVersion === '1.1') {
+	if (req.httpVersion === '1.1' && typeof req.headers.host === 'string') {
 		var method = req.method;
 		var url = new URL(`https://${req.headers.host}${req.url}`);
 		logger.debug(`INCOMING REQUEST: [${method}] ${url}`);
