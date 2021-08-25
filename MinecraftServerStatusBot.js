@@ -282,8 +282,6 @@ client.on('message', msg => {
 			}
 			// When the message was send on a DM or the member is not in the whitelisted roles
 			sendResponse(msg, Constants.bot.commands.responses.types.error, Constants.bot.commands.responses.error.insufficient_permission);
-			// ToDo 2021-08-25: unused code? commandExecute is not defined!
-			//commandExecuted(false);
 		}
 	}
 	catch(e) {
