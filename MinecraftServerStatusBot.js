@@ -16,7 +16,7 @@ const discordLogger = new DiscordLogger(Constants.bot.logging.level, Constants.b
 const client = new Discord.Client();
 
 // dev overwrites
-if (Constants.dev === true){
+if (Constants.dev === true) {
 	Constants.tls.key = './dev/privkey.pem';
 	Constants.tls.cert = './dev/fullchain.pem';
 }
@@ -57,11 +57,11 @@ function pingServer(callback) {
 }
 function updateBot(status) {
 	if (!botAvailable) {
-		logger.error('Received request to update bot status but bot is offline');
+		logger.error('Received request to update bot status but bot is offline.');
 		return false;
 	}
 	if (statusLocked) {
-		logger.info('Received request to update bot status but status is locked');
+		logger.info('Received request to update bot status but status is locked.');
 		return false;
 	}
 	switch (status) {
@@ -76,7 +76,7 @@ function updateBot(status) {
 				var activity;
 				if (success) {
 					activity = {
-						activity:{
+						activity: {
 							//name: Constants.bot.activities.running_2.activity.name.replace(/%c/g, response.playersOnline).replace(/%m/g, response.maxPlayers).replace(/%d/g, response.motd),
 							name: Constants.bot.activities.running_2.activity.name.replace(/%c/g, response.numPlayers).replace(/%m/g, response.maxPlayers).replace(/%d/g, response.motd),
 							type: Constants.bot.activities.running_2.activity.type
@@ -85,7 +85,7 @@ function updateBot(status) {
 					};
 				}
 				else {
-					logger.info('Received unexpected response from Minecraft Ping, using fallback running activity');
+					logger.info('Received unexpected response from Minecraft Ping, using fallback running activity.');
 					activity = Constants.bot.activities.running;
 				}
 				client.user.setPresence(activity);
@@ -217,7 +217,6 @@ function handleCommand(msg, cmd, args) {
 			sendResponse(msg, Constants.bot.commands.responses.types.error, Constants.bot.commands.responses.error.unknown_command);
 			return false;
 	}
-	throw new Error('IllegalStateException');
 }
 function sendResponse(msg, type, response) {
 	msg.channel.send(response);
@@ -241,105 +240,120 @@ client.once('ready', () => {
 	var channels = [];
 	Constants.bot.logging.channels.forEach((id) => { channels.push(client.channels.cache.get(id)); });
 	discordLogger.setChannels(channels);
-	discordLogger.log(DiscordLogger.LogLevels.BOT, 'Bot Ready');
+	discordLogger.log(DiscordLogger.LogLevels.EVERYTHING, 'Bot Ready');
 	logger.info(`Logged in as ${client.user.tag}`);
 	botAvailable = true;
+	// ToDo 2021-08-25: check for duplicate (Main.updateBot / Main.handleCommand-reload), outsource as much as possible, call Main.handleCommand(null, 'reload', null);
 	updateBot(Constants.server.states.stopped);
 });
 
 client.on('message', msg => {
-	if (msg.content.startsWith(Constants.bot.commands.prefix)) {
-		if (msg.guild != null) {
-			for (id of Constants.bot.commands.roles) {
-				if (msg.member.roles.cache.has(id)) {
-					var success;
-					var cmd = msg.content.replace(Constants.bot.commands.prefix, '').toLowerCase();
-					if (Object.keys(Constants.bot.commands.aliases).indexOf(cmd) != -1) {
-						success = true;
-						for (var i = 0; i < Constants.bot.commands.aliases[cmd].commands.length; i++) {
-							var aliasArgs = Constants.bot.commands.aliases[cmd].commands[i].split(' ');
-							var aliasCmd = aliasArgs.shift();
-							success = handleCommand(msg, aliasCmd, aliasArgs);
-							if (!success) {
-								sendResponse(msg, Constants.bot.commands.responses.types.error, Constants.bot.commands.responses.error.alias_aborted);
-								logger.error(`Aborted alias execution of '${cmd}' at position ${i} (${aliasCmd}). Please check your configuration`);
-								break;
+	try {
+		if (msg.content.startsWith(Constants.bot.commands.prefix)) {
+			if (msg.guild != null) {
+				for (id of Constants.bot.commands.roles) {
+					if (msg.member.roles.cache.has(id)) {
+						var success;
+						var cmd = msg.content.replace(Constants.bot.commands.prefix, '').toLowerCase();
+						if (Object.keys(Constants.bot.commands.aliases).indexOf(cmd) != -1) {
+							success = true;
+							for (var i = 0; i < Constants.bot.commands.aliases[cmd].commands.length; i++) {
+								var aliasArgs = Constants.bot.commands.aliases[cmd].commands[i].split(' ');
+								var aliasCmd = aliasArgs.shift();
+								success = handleCommand(msg, aliasCmd, aliasArgs);
+								if (!success) {
+									sendResponse(msg, Constants.bot.commands.responses.types.error, Constants.bot.commands.responses.error.alias_aborted);
+									logger.error(`Aborted alias execution of '${cmd}' at position ${i} (${aliasCmd}). Please check your configuration`);
+									break;
+								}
 							}
 						}
+						else {
+							var fullCommand = args = msg.content.split(' ');
+							fullCommand[0] = fullCommand[0].replace(Constants.bot.commands.prefix, '');
+							fullCommand = fullCommand.join(' ');
+							cmd = args.shift().replace(Constants.bot.commands.prefix, '').toLowerCase();
+							success = handleCommand(msg, cmd, args);
+						}
+						if (success) discordLogger.log(DiscordLogger.LogLevels.EVERYTHING, Constants.bot.logging.messages.used_command_successfully.replace(/%u/g, msg.author.toString()).replace(/%U/g, `${msg.author.username}#${msg.author.discriminator}`).replace(/%m/g, fullCommand).replace(/%c/g, cmd));
+						return;
 					}
-					else {
-						var fullCommand = args = msg.content.split(' ');
-						fullCommand[0] = fullCommand[0].replace(Constants.bot.commands.prefix, '');
-						fullCommand = fullCommand.join(' ');
-						cmd = args.shift().replace(Constants.bot.commands.prefix, '').toLowerCase();
-						success = handleCommand(msg, cmd, args);
-					}
-					if (success) discordLogger.log(DiscordLogger.LogLevels.EVERYTHING, Constants.bot.logging.messages.used_command_successfully.replace(/%u/g, msg.author.toString()).replace(/%U/g, `${msg.author.username}#${msg.author.discriminator}`).replace(/%m/g, fullCommand).replace(/%c/g, cmd));
-					return;
 				}
 			}
+			// When the message was send on a DM or the member is not in the whitelisted roles
+			sendResponse(msg, Constants.bot.commands.responses.types.error, Constants.bot.commands.responses.error.insufficient_permission);
+			// ToDo 2021-08-25: unused code? commandExecute is not defined!
+			//commandExecuted(false);
 		}
-		// When the message was send on a DM or the member is not in the whitelisted roles
-		sendResponse(msg, Constants.bot.commands.responses.types.error, Constants.bot.commands.responses.error.insufficient_permission);
-		commandExecuted(false);
+	}
+	catch(e) {
+		logger.error('An unexpected error occured during message event:');
+		console.error(e);
+		logger.info('Ignoring message.');
 	}
 });
 
 // init server
 var server = Https.createServer({key: Fs.readFileSync(Constants.tls.key), cert: Fs.readFileSync(Constants.tls.cert)}, (req, res) => {
-	if (req.httpVersion === '1.1' && typeof req.headers.host === 'string' && req.headers.host.length != 0) {
-		var method = req.method;
-		var url = new URL(`https://${req.headers.host}${req.url}`);
-		logger.debug(`INCOMING REQUEST: [${method}] ${url}`);
-		if (url.hostname === Constants.api.host && url.port == Constants.api.port) {
-			if (url.searchParams.get('token') === Constants.api.token) {
-				switch (url.pathname) {
-					case Constants.api.basePath:
-						var target = url.searchParams.get('target');
-						switch (method) {
-							case 'GET':
-								switch (target) {
-									case 'version':
-										res.writeHead(200);
-										res.end(Constants.api.version);
-										break;
-									default:
-										res.writeHead(405);
-										res.end();
-										break;
-								}
-								break;
-							case 'POST':
-								switch (target) {
-									case 'update':
-										var status = url.searchParams.get('status');
-										if (typeof status === 'string') {
-											logNewServerStateToDiscord(status);
-											var response = updateBot(status);
-											res.writeHead(response === true ? 204 : 503);
+	try {
+		if (req.httpVersion === '1.1' && typeof req.headers.host === 'string' && req.headers.host.length != 0) {
+			var method = req.method;
+			var url = new URL(`https://${req.headers.host}${req.url}`);
+			logger.debug(`INCOMING REQUEST: [${method}] ${url}`);
+			if (url.hostname === Constants.api.host && url.port == Constants.api.port) {
+				if (url.searchParams.get('token') === Constants.api.token) {
+					switch (url.pathname) {
+						case Constants.api.basePath:
+							var target = url.searchParams.get('target');
+							switch (method) {
+								case 'GET':
+									switch (target) {
+										case 'version':
+											res.writeHead(200);
+											res.end(Constants.api.version);
+											break;
+										default:
+											res.writeHead(405);
 											res.end();
 											break;
-										}
-									default:
-										res.writeHead(405);
-										res.end();
-										break;
-								}
-								break;
-							default:
-								res.writeHead(405);
-								res.end();
-								break;
-						}
-						break;
-					default:
-						res.writeHead(404);
-						res.end();
-						break;
+									}
+									break;
+								case 'POST':
+									switch (target) {
+										case 'update':
+											var status = url.searchParams.get('status');
+											if (typeof status === 'string') {
+												logNewServerStateToDiscord(status);
+												var response = updateBot(status);
+												res.writeHead(response === true ? 204 : 503);
+												res.end();
+												break;
+											}
+										default:
+											res.writeHead(405);
+											res.end();
+											break;
+									}
+									break;
+								default:
+									res.writeHead(405);
+									res.end();
+									break;
+							}
+							break;
+						default:
+							res.writeHead(404);
+							res.end();
+							break;
+					}
+				}
+				else {
+					res.writeHead(401, {'WWW-Authenticate': 'Bearer realm="Unauthorized", charset="UTF-8"'});
+					res.end();
 				}
 			}
 			else {
-				res.writeHead(401, {'WWW-Authenticate': 'Bearer realm="Unauthorized", charset="UTF-8"'});
+				res.writeHead(400);
 				res.end();
 			}
 		}
@@ -348,9 +362,10 @@ var server = Https.createServer({key: Fs.readFileSync(Constants.tls.key), cert: 
 			res.end();
 		}
 	}
-	else {
-		res.writeHead(400);
-		res.end();
+	catch(e) {
+		logger.error('An unexpected error occured during API request:');
+		console.error(e);
+		logger.info('Ignoring API request.');
 	}
 });
 
