@@ -192,7 +192,7 @@ module.exports = {
 					 * %c list of all commands
 					 * %a list of all aliases
 					 */
-					command_help: '__**HELP**__\n__**Commands:**__\n%c\n__**Aliases:**__\n%a'
+					command_help: '__**HELP**__\n__**Commands:**__\n%c\n__**Aliases:**__\n%a',
 					command_ping: 'Pong!',
 					/* 
 					 * %v = program version
