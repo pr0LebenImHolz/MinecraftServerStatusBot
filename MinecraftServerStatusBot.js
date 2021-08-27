@@ -11,7 +11,13 @@ const Fs = require('fs');
 const MinecraftPing = require('minecraft-ping');
 
 // init
-const logger = new Logger(Constants.logging.level, Constants.logging.basedir);
+const logger = new Logger(Constants.logging.level, Constants.logging.basedir, (str) => {
+	return str
+		.replaceAll(Constants.api.host, '$HOST$')
+		.replaceAll(Constants.api.port, '$PORT$')
+		.replaceAll(Constants.api.basePath, '/$BASEPATH$/')
+		.replaceAll(Constants.api.token, '$TOKEN$');
+});
 const discordLogger = new DiscordLogger(Constants.bot.logging.level, Constants.bot.logging.planned_api_requests, []);
 const client = new Discord.Client();
 
@@ -282,8 +288,6 @@ client.on('message', msg => {
 			}
 			// When the message was send on a DM or the member is not in the whitelisted roles
 			sendResponse(msg, Constants.bot.commands.responses.types.error, Constants.bot.commands.responses.error.insufficient_permission);
-			// ToDo 2021-08-25: unused code? commandExecute is not defined!
-			//commandExecuted(false);
 		}
 	}
 	catch(e) {
@@ -295,17 +299,16 @@ client.on('message', msg => {
 
 // init server
 var server = Https.createServer({key: Fs.readFileSync(Constants.tls.key), cert: Fs.readFileSync(Constants.tls.cert)}, (req, res) => {
+	logger.debug(hideSensibleData(`Incoming Request:\n  Protocol:   HTTP/'${req.httpVersion}'\n  Method:     '${String(req.method).toUpperCase()}'\n  Host:       '${req.headers.host}'\n  URL:        '${req.url}'\n  User-Agent: '${req.headers['user-agent']}'`));
 	try {
 		if (req.httpVersion === '1.1' && typeof req.headers.host === 'string' && req.headers.host.length != 0) {
-			var method = req.method;
 			var url = new URL(`https://${req.headers.host}${req.url}`);
-			logger.debug(`INCOMING REQUEST: [${method}] ${url}`);
 			if (url.hostname === Constants.api.host && url.port == Constants.api.port) {
 				if (url.searchParams.get('token') === Constants.api.token) {
 					switch (url.pathname) {
 						case Constants.api.basePath:
 							var target = url.searchParams.get('target');
-							switch (method) {
+							switch (req.method) {
 								case 'GET':
 									switch (target) {
 										case 'version':

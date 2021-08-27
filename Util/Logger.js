@@ -1,8 +1,9 @@
 class Logger {
 	
-	constructor(level, baseDir) {
+	constructor(level, baseDir, removeSensibleData = (str) => { return str; }) {
 		_level = level;
 		_baseDir = baseDir;
+		_removeSensibleData = removeSensibleData;
 	}
 	
 	debug(message) {
@@ -21,6 +22,7 @@ class Logger {
 
 var _level = 0;
 var _baseDir = '';
+var _removeSensibleData;
 
 function logToConsole(message) {
 	let stack = (new Error()).stack;
@@ -36,7 +38,7 @@ function logToConsole(message) {
 		name = stack.split('\n')[4].split(' ')[5];
 		file = stack.split('\n')[3].split(' ')[5].replace(_baseDir, '');
 	}
-	console[type](`[${type[0].toUpperCase()}] ${(new Date()).toISOString()} [${file} ${name}] ${message}`);
+	console[type](_removeSensibleData(`[${type[0].toUpperCase()}] ${(new Date()).toISOString()} [${file} ${name}] ${message}`));
 }
 
 module.exports = Logger;
