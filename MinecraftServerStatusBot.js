@@ -12,11 +12,12 @@ const MinecraftPing = require('minecraft-ping');
 
 // init
 const logger = new Logger(Constants.logging.level, Constants.logging.basedir, (str) => {
+	// there is no replaceAll method in this node version -.-
 	return str
-		.replaceAll(Constants.api.host, '$HOST$')
-		.replaceAll(Constants.api.port, '$PORT$')
-		.replaceAll(Constants.api.basePath, '/$BASEPATH$/')
-		.replaceAll(Constants.api.token, '$TOKEN$');
+		.replace(new RegExp(Constants.api.host, 'g'), '$HOST$')
+		.replace(new RegExp(Constants.api.port, 'g'), '$PORT$')
+		.replace(new RegExp(Constants.api.basePath, 'g'), '/$BASEPATH$/')
+		.replace(new RegExp(Constants.api.token, 'g'), '$TOKEN$');
 });
 const discordLogger = new DiscordLogger(Constants.bot.logging.level, Constants.bot.logging.planned_api_requests, []);
 const client = new Discord.Client();
