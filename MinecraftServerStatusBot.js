@@ -16,7 +16,6 @@ const logger = new Logger(Constants.logging.level, Constants.logging.basedir, (s
 	return str
 		.replace(new RegExp(Constants.api.host, 'g'), '$HOST$')
 		.replace(new RegExp(Constants.api.port, 'g'), '$PORT$')
-		.replace(new RegExp(Constants.api.basePath, 'g'), '/$BASEPATH$/')
 		.replace(new RegExp(Constants.api.token, 'g'), '$TOKEN$');
 });
 const discordLogger = new DiscordLogger(Constants.bot.logging.level, Constants.bot.logging.planned_api_requests, []);
@@ -300,7 +299,8 @@ client.on('message', msg => {
 
 // init server
 var server = Https.createServer({key: Fs.readFileSync(Constants.tls.key), cert: Fs.readFileSync(Constants.tls.cert)}, (req, res) => {
-	logger.debug(`Incoming Request:\n  Protocol:   HTTP/'${req.httpVersion}'\n  Method:     '${String(req.method).toUpperCase()}'\n  Host:       '${req.headers.host}'\n  URL:        '${req.url}'\n  User-Agent: '${req.headers['user-agent']}'`);
+	// req.connection is deprecated since nodejs v16.0.0 - the bot uses v14.17.2
+	logger.debug(`Incoming Request:\n  Remote:   '${req.ip || req.connection.remoteAddress}'\n  Protocol:   HTTP/'${req.httpVersion}'\n  Method:     '${String(req.method).toUpperCase()}'\n  Host:       '${req.headers.host}'\n  URL:        '${req.url}'\n  User-Agent: '${req.headers['user-agent']}'`);
 	try {
 		if (req.httpVersion === '1.1' && typeof req.headers.host === 'string' && req.headers.host.length != 0) {
 			var url = new URL(`https://${req.headers.host}${req.url}`);
