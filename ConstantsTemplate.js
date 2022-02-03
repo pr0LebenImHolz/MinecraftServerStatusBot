@@ -18,7 +18,8 @@ module.exports = {
 		 * 0 DEBUG (Don't use this in production)
 		 * 1 INFO (Use this)
 		 * 2 LOG
-		 * 3 ERROR
+		 * 3 WARN
+		 * 4 ERROR
 		 */
 		level: 1, //@TODO
 		/*
