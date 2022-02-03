@@ -300,8 +300,9 @@ client.on('message', msg => {
 // init server
 var server = Https.createServer({key: Fs.readFileSync(Constants.tls.key), cert: Fs.readFileSync(Constants.tls.cert)}, (req, res) => {
 	// req.connection is deprecated since nodejs v16.0.0 - the bot uses v14.17.2
-	logger.debug(`Incoming Request:\n  Remote:   '${req.ip || req.connection.remoteAddress}'\n  Protocol:   HTTP/'${req.httpVersion}'\n  Method:     '${String(req.method).toUpperCase()}'\n  Host:       '${req.headers.host}'\n  URL:        '${req.url}'\n  User-Agent: '${req.headers['user-agent']}'`);
-	function respond(code, ip, head = null, body = null) {
+	const ip = req.ip || req.connection.remoteAddress
+	logger.debug(`Incoming Request:\n  Remote:   '${ip}'\n  Protocol:   HTTP/'${req.httpVersion}'\n  Method:     '${String(req.method).toUpperCase()}'\n  Host:       '${req.headers.host}'\n  URL:        '${req.url}'\n  User-Agent: '${req.headers['user-agent']}'`);
+	function respond(code, head = null, body = null) {
 		if (Constants.logging.fail2ban === true) switch(code) {
 			case 400:
 			case 401:
@@ -336,10 +337,10 @@ var server = Https.createServer({key: Fs.readFileSync(Constants.tls.key), cert: 
 								case 'GET':
 									switch (target) {
 										case 'version':
-											respond(200, req.ip, null, Constants.api.version);
+											respond(200, null, Constants.api.version);
 											break;
 										default:
-											respond(405, req.ip);
+											respond(405);
 											break;
 									}
 									break;
@@ -350,34 +351,34 @@ var server = Https.createServer({key: Fs.readFileSync(Constants.tls.key), cert: 
 											if (typeof status === 'string') {
 												logNewServerStateToDiscord(status);
 												var response = updateBot(status);
-												respond(response === true ? 204 : 503, req.ip);
+												respond(response === true ? 204 : 503);
 												break;
 											}
 										default:
-											respond(405, req.ip);
+											respond(405);
 											break;
 									}
 									break;
 								default:
-									respond(405, req.ip);
+									respond(405);
 									break;
 							}
 							break;
 						default:
-							respond(404, req.ip);
+							respond(404);
 							break;
 					}
 				}
 				else {
-					respond(401, req.ip, {'WWW-Authenticate': 'Bearer realm="Unauthorized", charset="UTF-8"'});
+					respond(401, {'WWW-Authenticate': 'Bearer realm="Unauthorized", charset="UTF-8"'});
 				}
 			}
 			else {
-				respond(400, req.ip);
+				respond(400);
 			}
 		}
 		else {
-			respond(400, req.ip);
+			respond(400);
 		}
 	}
 	catch(e) {
