@@ -1,0 +1,37 @@
+{
+  "name": "minecraftserverstatusbot",
+  "version": "1.0.0",
+  "description": "This DiscordBot uses the [MinecraftStatusUpdater](https://github.com/pr0LebenImHolz/MinecraftStatusUpdater) Mod to display the status in the activity in real time. | Contents | | --- | | 1) [Bot Commands](#bot-commands) | | 1.1) [Bot States](#bot-states) | | 1.2) [Bot Activities](#bot-activities) | | 2) [API](#api) | | 2.1) [Endpoint: Version](#version) | | 2.2) [Endpoint: Update](#update) | | 3) [Installation](#installation) | | 3.1) [Bot Permissions](#bot-permissions) | | 3.2) [Installing Script](#installing-script) |",
+  "main": "MinecraftServerStatusBot.js",
+  "dependencies": {
+    "asynckit": "^0.4.0",
+    "abort-controller": "^3.0.0",
+    "combined-stream": "^1.0.8",
+    "delayed-stream": "^1.0.0",
+    "discord.js": "^12.5.1",
+    "event-target-shim": "^5.0.1",
+    "https": "^1.0.0",
+    "mime-db": "^1.46.0",
+    "mime-types": "^2.1.29",
+    "minecraft-ping": "^1.0.0",
+    "node-fetch": "^2.6.1",
+    "setimmediate": "^1.0.5",
+    "tweetnacl": "^1.0.3",
+    "prism-media": "^1.2.7",
+    "ws": "^7.4.3"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pr0LebenImHolz/MinecraftServerStatusBot.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pr0LebenImHolz/MinecraftServerStatusBot/issues"
+  },
+  "homepage": "https://github.com/pr0LebenImHolz/MinecraftServerStatusBot#readme"
+}
