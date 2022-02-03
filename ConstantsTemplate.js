@@ -25,7 +25,11 @@ module.exports = {
 		 * The directory to cut of all log messages (the parent directory of the main class should be fine)
 		 * working dir (parent dir of main class): `${process.cwd()}/`
 		 */
-		basedir: `${process.cwd()}/`
+		basedir: `${process.cwd()}/`,
+		/**
+		 * Whether to log information for fail2ban or not
+		 */
+		fail2ban: true
 	},
 	tls: {
 		/* 
