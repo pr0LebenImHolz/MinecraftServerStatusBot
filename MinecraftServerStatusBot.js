@@ -302,7 +302,7 @@ var server = Https.createServer({key: Fs.readFileSync(Constants.tls.key), cert: 
 	// req.connection is deprecated since nodejs v16.0.0 - the bot uses v14.17.2
 	logger.debug(`Incoming Request:\n  Remote:   '${req.ip || req.connection.remoteAddress}'\n  Protocol:   HTTP/'${req.httpVersion}'\n  Method:     '${String(req.method).toUpperCase()}'\n  Host:       '${req.headers.host}'\n  URL:        '${req.url}'\n  User-Agent: '${req.headers['user-agent']}'`);
 	function respond(code, head = null, body = null) {
-		if (Constants.logger.fail2ban) switch(code) {
+		if (Constants.logging.fail2ban === true) switch(code) {
 			case 400:
 			case 401:
 			case 403:
