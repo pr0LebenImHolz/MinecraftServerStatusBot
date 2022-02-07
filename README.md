@@ -1,6 +1,6 @@
 # MinecraftServerStatusBot
 
-This DiscordBot uses the [MinecraftStatusUpdater](https://github.com/pr0LebenImHolz/MinecraftStatusUpdater) Mod to display the status in the activity in real time.
+This DiscordBot uses the [MinecraftServerStatusUpdater](https://github.com/pr0LebenImHolz/MinecraftServerStatusUpdater) Mod to display the status in the activity in real time.
 | Contents |
 | --- |
 | 1) [Bot Commands](#bot-commands) |
