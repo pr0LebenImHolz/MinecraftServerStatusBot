@@ -7,7 +7,7 @@ module.exports = {
 	 * - pre (pre release)
 	 * - x.y.z (major.minor.patch)
 	 */
-	version: 'v1.0.1',
+	version: 'v1.0.2',
 	/*
 	 * Don't use this in production - this enables dev logging and some dev variables
 	 * @see MinecraftServerStatusBot.js:16 'dev overwrites'
@@ -37,14 +37,19 @@ module.exports = {
 		 * For Let's Encrypt (Certbot), use these paths:
 		 * key: /etc/letsencrypt/live/[domain]/privkey.pem
 		 * cert: /etc/letsencrypt/live/[domain]/fullchain.pem
+		 * 
+		 * The disabled flag is only available when Constants.dev === true:
+		 * It disables TLS and uses http.createServer instead of https.createServer.
 		 */
 		key: './dev/privkey.pem', //@TODO
-		cert: './dev/fullchain.pem' //@TODO
+		cert: './dev/fullchain.pem', //@TODO
+		disabled: false
 	},
 	api: {
 		/* 
 		 * Defines the credentials to access the API.
 		 * No protocol (http(s)://) needed for host - using tls anyways!
+		 * API Version(s): 2.0.0
 		 */
 		host: 'example.com', //@TODO
 		port: 443, //@TODO
@@ -52,11 +57,7 @@ module.exports = {
 		/* 
 		 * https://randomkeygen.com/ -> CodeIgniter Encryption Keys
 		 */
-		token: 'hippopotomonstrosesquippedaliophobia', //@TODO
-		/* 
-		 * API Version - will be returned so the Mod can check (compare) them
-		 */
-		version: '1.0.0'
+		token: 'hippopotomonstrosesquippedaliophobia' //@TODO
 	},
 	bot: {
 		/*

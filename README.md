@@ -7,6 +7,7 @@ This DiscordBot uses the [MinecraftServerStatusUpdater](https://github.com/pr0Le
 | 1.1) [Bot States](#bot-states) |
 | 1.2) [Bot Activities](#bot-activities) |
 | 2) [API](#api) |
+| 2.1) [V1.0.0](#v1.0.0)
 | 2.1) [Endpoint: Version](#version) |
 | 2.2) [Endpoint: Update](#update) |
 | 3) [Installation](#installation) |
@@ -44,7 +45,9 @@ Requests must be made using HTTP/1.1 and TLS. Also, the host and path specified 
 
 The Bot provides following endpoints:
 
-### Version
+### V1.0.0
+
+#### Version
 
 ```HTTP
 GET /?token=X&target=version HTTP/1.1
@@ -56,7 +59,7 @@ The Bot returns an HTTP 200 response with the API version in the response body w
 
 `1.0.0`
 
-### Update
+#### Update
 
 ```HTTP
 POST /?token=X&target=update&status=Y HTTP/1.1
