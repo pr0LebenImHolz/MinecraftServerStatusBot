@@ -6,9 +6,17 @@ const BotStatus = require('./Util/BotStatus.js');
 const Logger = require('./Util/Logger.js');
 const DiscordLogger = require('./Util/DiscordLogger.js');
 const Discord = require('discord.js');
+const Http = require('http');
 const Https = require('https');
 const Fs = require('fs');
 const MinecraftPing = require('minecraft-ping');
+
+// dev overwrites
+if (Constants.dev === true) {
+	Constants.tls.key = './dev/privkey.pem';
+	Constants.tls.cert = './dev/fullchain.pem';
+	Constants.logging.level = 0;
+}
 
 // init
 const logger = new Logger(Constants.logging.level, Constants.logging.basedir, (str) => {
@@ -18,14 +26,9 @@ const logger = new Logger(Constants.logging.level, Constants.logging.basedir, (s
 		.replace(new RegExp(Constants.api.port, 'g'), '$PORT$')
 		.replace(new RegExp(Constants.api.token, 'g'), '$TOKEN$');
 });
+if (Constants.dev === true) logger.debug(`Running bot in debug mode. Overwritten log level, ${Constants.tls.disabled === true ? 'disabled TLS' : 'kept TLS enabled'}.`);
 const discordLogger = new DiscordLogger(Constants.bot.logging.level, Constants.bot.logging.planned_api_requests, []);
 const client = new Discord.Client();
-
-// dev overwrites
-if (Constants.dev === true) {
-	Constants.tls.key = './dev/privkey.pem';
-	Constants.tls.cert = './dev/fullchain.pem';
-}
 
 // methods
 function pingServer(callback) {
@@ -61,7 +64,7 @@ function pingServer(callback) {
 		}
 	});
 }
-function updateBot(status) {
+function updateBotLegacy(status) {
 	if (!botAvailable) {
 		logger.error('Received request to update bot status but bot is offline.');
 		return false;
@@ -106,6 +109,48 @@ function updateBot(status) {
 			break;
 	}
 	return true;
+}
+function updateBot(status, count = null) {
+	if (!botAvailable) {
+		logger.error('Received request to update bot status but bot is offline.');
+		return {success: false, reason: 'bot_unavailable'};
+	}
+	if (statusLocked) {
+		logger.info('Received request to update bot status but status is locked.');
+		return {success: false, reason: 'bot_locked'};
+	}
+	switch (status) {
+		case Constants.server.states.starting:
+			client.user.setPresence(Constants.bot.activities.starting);
+			break;
+		case Constants.server.states.stopping:
+			client.user.setPresence(Constants.bot.activities.stopping);
+			break;
+		case Constants.server.states.running:
+			var activity;
+			if (count == null) {
+				activity = Constants.bot.activities.running;
+			}
+			else {
+				activity = {
+					activity: {
+						name: Constants.bot.activities.running_2.activity.name.replace(/%c/g, count).replace(/%m/g, slots).replace(/%d/g, motd),
+						type: Constants.bot.activities.running_2.activity.type
+					},
+					status: Constants.bot.activities.running_2.status
+				};
+			}
+			client.user.setPresence(activity);
+			break;
+		case Constants.server.states.stopped:
+			var activity = Constants.bot.activities.offline;
+			client.user.setPresence(activity);
+			break;
+		default:
+			logger.error(`Unknown state: ${status}`);
+			break;
+	}
+	return {success: true};
 }
 /*
  * unused method; maybe useful for coming features...
@@ -238,6 +283,8 @@ var oldServerState = null;
 var botAvailable = false;
 var helpParsed = false;
 var statusLocked = false;
+var motd = null;
+var slots = -1;
 
 logger.info(`Initialized Script ${Constants.version}`);
 
@@ -250,7 +297,7 @@ client.once('ready', () => {
 	logger.info(`Logged in as ${client.user.tag}`);
 	botAvailable = true;
 	// ToDo 2021-08-25: check for duplicate (Main.updateBot / Main.handleCommand-reload), outsource as much as possible, call Main.handleCommand(null, 'reload', null);
-	updateBot(Constants.server.states.stopped);
+	updateBotLegacy(Constants.server.states.stopped);
 });
 
 client.on('message', msg => {
@@ -298,7 +345,10 @@ client.on('message', msg => {
 });
 
 // init server
-var server = Https.createServer({key: Fs.readFileSync(Constants.tls.key), cert: Fs.readFileSync(Constants.tls.cert)}, (req, res) => {
+var server = Constants.dev === true && Constants.tls.disabled === true ?
+	Http.createServer(handleRequest) :
+	Https.createServer({key: Fs.readFileSync(Constants.tls.key), cert: Fs.readFileSync(Constants.tls.cert)}, handleRequest);
+function handleRequest(req, res) {
 	// req.connection is deprecated since nodejs v16.0.0 - the bot uses v14.17.2
 	const ip = req.ip || req.connection.remoteAddress
 	logger.debug(`Incoming Request:\n  Remote:   '${ip}'\n  Protocol:   HTTP/'${req.httpVersion}'\n  Method:     '${String(req.method).toUpperCase()}'\n  Host:       '${req.headers.host}'\n  URL:        '${req.url}'\n  User-Agent: '${req.headers['user-agent']}'`);
@@ -324,53 +374,112 @@ var server = Https.createServer({key: Fs.readFileSync(Constants.tls.key), cert: 
 		else {
 			res.end();
 		}
+		logger.debug(`Response:\n  Code: ${code}\n  Head: ${head}\n  Body: ${body}`)
 	}
 	try {
 		if (req.httpVersion === '1.1' && typeof req.headers.host === 'string' && req.headers.host.length != 0) {
 			var url = new URL(`https://${req.headers.host}${req.url}`);
 			if (url.hostname === Constants.api.host && url.port == Constants.api.port) {
-				if (url.searchParams.get('token') === Constants.api.token) {
-					switch (url.pathname) {
-						case Constants.api.basePath:
-							var target = url.searchParams.get('target');
-							switch (req.method) {
-								case 'GET':
-									switch (target) {
-										case 'version':
-											respond(200, null, Constants.api.version);
+				if (url.pathname === Constants.api.basePath + 'versions') { // versions
+					respond(200, null, '1.0.0\n2.0.0');
+				}
+				else if (url.pathname === Constants.api.basePath) { // v1.0.0
+					if (url.searchParams.get('token') === Constants.api.token) {
+						var target = url.searchParams.get('target');
+						switch (req.method) {
+							case 'GET':
+								switch (target) {
+									case 'version':
+										respond(200, null, '1.0.0');
+										break;
+									default:
+										respond(405);
+										break;
+								}
+								break;
+							case 'POST':
+								switch (target) {
+									case 'update':
+										var status = url.searchParams.get('status');
+										if (typeof status === 'string') {
+											logNewServerStateToDiscord(status);
+											var response = updateBotLegacy(status);
+											respond(response === true ? 204 : 503);
 											break;
-										default:
+										}
+									default:
+										respond(405);
+										break;
+								}
+								break;
+							default:
+								respond(405);
+								break;
+						}
+					}
+					else {
+						respond(401, {'WWW-Authenticate': 'Bearer realm="Unauthorized", charset="UTF-8"'});
+					}
+				}
+				else if (url.pathname.startsWith(Constants.api.basePath + '2.0.0')) { // v2.0.0
+					if (req.headers.authorization) {
+						if (req.headers.authorization === 'Bearer ' + Constants.api.token) {
+							if (req.method === 'POST') {
+								switch (url.pathname) {
+									case Constants.api.basePath + '2.0.0/notify/starting':
+										logNewServerStateToDiscord(Constants.server.states.starting);
+										var response = updateBot(Constants.server.states.starting);
+										respond(response.success === true ? 204 : response.reason === 'bot_locked' ? 204 : 503);
+										break;
+									case Constants.api.basePath + '2.0.0/notify/started':
+										if (url.searchParams.has('motd') && url.searchParams.has('slots')) {
+											logNewServerStateToDiscord(Constants.server.states.running);
+											motd = url.searchParams.get('motd');
+											slots = url.searchParams.get('slots');
+											var response = updateBot(Constants.server.states.running, 0);
+											respond(response.success === true ? 204 : response.reason === 'bot_locked' ? 204 : 503);
+										} else {
 											respond(405);
-											break;
-									}
-									break;
-								case 'POST':
-									switch (target) {
-										case 'update':
-											var status = url.searchParams.get('status');
-											if (typeof status === 'string') {
-												logNewServerStateToDiscord(status);
-												var response = updateBot(status);
-												respond(response === true ? 204 : 503);
-												break;
-											}
-										default:
+										}
+										break;
+									case Constants.api.basePath + '2.0.0/notify/stopping':
+										logNewServerStateToDiscord(Constants.server.states.stopping);
+										var response = updateBot(Constants.server.states.stopping);
+										respond(response.success === true ? 204 : response.reason === 'bot_locked' ? 204 : 503);
+										break;
+									case Constants.api.basePath + '2.0.0/notify/stopped':
+										logNewServerStateToDiscord(Constants.server.states.stopped);
+										var response = updateBot(Constants.server.states.stopped);
+										respond(response.success === true ? 204 : response.reason === 'bot_locked' ? 204 : 503);
+										break;
+									case Constants.api.basePath + '2.0.0/notify/player':
+										if (url.searchParams.has('count')) {
+											logNewServerStateToDiscord(Constants.server.states.running);
+											var response = updateBot(Constants.server.states.running, url.searchParams.get('count'));
+											respond(response.success === true ? 204 : response.reason === 'bot_locked' ? 204 : 503);
+										} else {
 											respond(405);
-											break;
-									}
-									break;
-								default:
-									respond(405);
-									break;
+										}
+										break;
+									default:
+										respond(404);
+										break;
+								}
 							}
-							break;
-						default:
-							respond(404);
-							break;
+							else {
+								respond(405);
+							}
+						}
+						else {
+							respond(401, {'WWW-Authenticate': 'Token realm="Unauthorized", charset="UTF-8"'});
+						}
+					}
+					else {
+						respond(401, {'WWW-Authenticate': 'Token realm="Unauthorized", charset="UTF-8"'});
 					}
 				}
 				else {
-					respond(401, {'WWW-Authenticate': 'Bearer realm="Unauthorized", charset="UTF-8"'});
+					respond(400);
 				}
 			}
 			else {
@@ -386,7 +495,7 @@ var server = Https.createServer({key: Fs.readFileSync(Constants.tls.key), cert: 
 		console.error(e);
 		logger.info('Ignoring API request.');
 	}
-});
+}
 
 //start
 

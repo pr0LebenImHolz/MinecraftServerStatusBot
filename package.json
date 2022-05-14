@@ -1,6 +1,6 @@
 {
   "name": "minecraftserverstatusbot",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "This DiscordBot uses the [MinecraftStatusUpdater](https://github.com/pr0LebenImHolz/MinecraftStatusUpdater) Mod to display the status in the activity in real time. | Contents | | --- | | 1) [Bot Commands](#bot-commands) | | 1.1) [Bot States](#bot-states) | | 1.2) [Bot Activities](#bot-activities) | | 2) [API](#api) | | 2.1) [Endpoint: Version](#version) | | 2.2) [Endpoint: Update](#update) | | 3) [Installation](#installation) | | 3.1) [Bot Permissions](#bot-permissions) | | 3.2) [Installing Script](#installing-script) |",
   "main": "MinecraftServerStatusBot.js",
   "dependencies": {
