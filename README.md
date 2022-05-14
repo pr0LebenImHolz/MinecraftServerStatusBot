@@ -7,9 +7,16 @@ This DiscordBot uses the [MinecraftServerStatusUpdater](https://github.com/pr0Le
 | 1.1) [Bot States](#bot-states) |
 | 1.2) [Bot Activities](#bot-activities) |
 | 2) [API](#api) |
-| 2.1) [V1.0.0](#v1.0.0)
-| 2.1) [Endpoint: Version](#version) |
-| 2.2) [Endpoint: Update](#update) |
+| 2.1) [Endpoint: Versions](#versions) |
+| 2.2) [V1.0.0](#v1.0.0) |
+| 2.2.1) [Endpoint: Version](#version) |
+| 2.2.2) [Endpoint: Update](#update) |
+| 2.3) [V2.0.0](#v2.0.0) |
+| 2.3.1) [Notify Starting](#notify-starting) |
+| 2.3.2) [Notify Started](#notify-started) |
+| 2.3.3) [Notify Stopping](#notify-stopping) |
+| 2.3.4) [Notify Stopped](#notify-stopped) |
+| 2.3.5) [Notify Player Count](#notify-player-count) |
 | 3) [Installation](#installation) |
 | 3.1) [Bot Permissions](#bot-permissions) |
 | 3.2) [Installing Script](#installing-script) |
@@ -69,6 +76,56 @@ Host: example.com:8443
 - Y: [Server State](#server-states)
 
 The Bot returns an HTTP 204 response with an empty response body.
+
+### V2.0.0
+
+#### Notify Starting
+
+```HTTP
+POST /2.0.0/notify/starting HTTP/1.1
+Host: eample.com:8443
+Authorization: Bearer X
+```
+- X: API Token
+
+#### Notify Started
+
+```HTTP
+POST /2.0.0/notify/started?slots=Y&motd=Z HTTP/1.1
+Host: eample.com:8443
+Authorization: Bearer X
+```
+- X: API Token
+- Y: The available player slots configured in `server.properties`
+- Z: The Server MOTD configured in `server.properties`
+
+#### Notify Stopping
+
+```HTTP
+POST /2.0.0/notify/stopping HTTP/1.1
+Host: eample.com:8443
+Authorization: Bearer X
+```
+- X: API Token
+
+#### Notify Stopped
+
+```HTTP
+POST /2.0.0/notify/stopped HTTP/1.1
+Host: eample.com:8443
+Authorization: Bearer X
+```
+- X: API Token
+
+#### Notify Player Count
+
+```HTTP
+POST /2.0.0/notify/player?count=Y HTTP/1.1
+Host: eample.com:8443
+Authorization: Bearer X
+```
+- X: API Token
+- Y: The number of players currently online
 
 ### Server States
 
