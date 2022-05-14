@@ -234,13 +234,7 @@ Updates the bot's status to `Server Stopped`.
 
 ##### Request
 
-```HTTP
-POST /2.0.0/notify/stopped HTTP/1.1
-Authorization: Bearer X
-Connection: close
-Host: example.com:8443
-```
-- `X`: API Token
+[Default](#default-request) with endpointPath `/notify/stopped`
 
 
 ##### Response
