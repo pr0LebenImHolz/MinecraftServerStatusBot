@@ -348,7 +348,7 @@ client.on('message', msg => {
 var server = Constants.dev === true && Constants.tls.disabled === true ?
 	Http.createServer(handleRequest) :
 	Https.createServer({key: Fs.readFileSync(Constants.tls.key), cert: Fs.readFileSync(Constants.tls.cert)}, handleRequest);
-function handleRequest(req, res) {
+	function handleRequest(req, res) {
 	// req.connection is deprecated since nodejs v16.0.0 - the bot uses v14.17.2
 	const ip = req.ip || req.connection.remoteAddress
 	logger.debug(`Incoming Request:\n  Remote:   '${ip}'\n  Protocol:   HTTP/'${req.httpVersion}'\n  Method:     '${String(req.method).toUpperCase()}'\n  Host:       '${req.headers.host}'\n  URL:        '${req.url}'\n  User-Agent: '${req.headers['user-agent']}'`);
@@ -380,7 +380,9 @@ function handleRequest(req, res) {
 		if (req.httpVersion === '1.1' && typeof req.headers.host === 'string' && req.headers.host.length != 0) {
 			var url = new URL(`https://${req.headers.host}${req.url}`);
 			if (url.hostname === Constants.api.host && url.port == Constants.api.port) {
-				if (url.pathname === Constants.api.basePath + 'versions') { // versions
+				if (url.pathname === Constants.api.basePath + 'versions' &&
+					req.method === 'GET' &&
+					req.headers.connection === 'close') { // versions
 					respond(200, null, '1.0.0\n2.0.0');
 				}
 				else if (url.pathname === Constants.api.basePath) { // v1.0.0
@@ -421,7 +423,8 @@ function handleRequest(req, res) {
 						respond(401, {'WWW-Authenticate': 'Bearer realm="Unauthorized", charset="UTF-8"'});
 					}
 				}
-				else if (url.pathname.startsWith(Constants.api.basePath + '2.0.0')) { // v2.0.0
+				else if (url.pathname.startsWith(Constants.api.basePath + '2.0.0') &&
+					req.headers.connection === 'close') { // v2.0.0
 					if (req.headers.authorization) {
 						if (req.headers.authorization === 'Bearer ' + Constants.api.token) {
 							if (req.method === 'POST') {
@@ -439,7 +442,7 @@ function handleRequest(req, res) {
 											var response = updateBot(Constants.server.states.running, 0);
 											respond(response.success === true ? 204 : response.reason === 'bot_locked' ? 204 : 503);
 										} else {
-											respond(405);
+											respond(405, null, "missing query argument(s) {motd: string}, {slots: int}");
 										}
 										break;
 									case Constants.api.basePath + '2.0.0/notify/stopping':
@@ -458,7 +461,7 @@ function handleRequest(req, res) {
 											var response = updateBot(Constants.server.states.running, url.searchParams.get('count'));
 											respond(response.success === true ? 204 : response.reason === 'bot_locked' ? 204 : 503);
 										} else {
-											respond(405);
+											respond(405, null, "missing query argument(s) {count: int}");
 										}
 										break;
 									default:
@@ -493,7 +496,7 @@ function handleRequest(req, res) {
 	catch(e) {
 		logger.error('An unexpected error occured during API request:');
 		console.error(e);
-		logger.info('Ignoring API request.');
+		respond(500);
 	}
 }
 
@@ -501,4 +504,4 @@ function handleRequest(req, res) {
 
 server.listen(Constants.api.port);
 
-client.login(Constants.bot.token);
+//client.login(Constants.bot.token);
