@@ -348,7 +348,7 @@ client.on('message', msg => {
 var server = Constants.dev === true && Constants.tls.disabled === true ?
 	Http.createServer(handleRequest) :
 	Https.createServer({key: Fs.readFileSync(Constants.tls.key), cert: Fs.readFileSync(Constants.tls.cert)}, handleRequest);
-	function handleRequest(req, res) {
+function handleRequest(req, res) {
 	// req.connection is deprecated since nodejs v16.0.0 - the bot uses v14.17.2
 	const ip = req.ip || req.connection.remoteAddress
 	logger.debug(`Incoming Request:\n  Remote:   '${ip}'\n  Protocol:   HTTP/'${req.httpVersion}'\n  Method:     '${String(req.method).toUpperCase()}'\n  Host:       '${req.headers.host}'\n  URL:        '${req.url}'\n  User-Agent: '${req.headers['user-agent']}'`);
@@ -504,4 +504,4 @@ var server = Constants.dev === true && Constants.tls.disabled === true ?
 
 server.listen(Constants.api.port);
 
-//client.login(Constants.bot.token);
+client.login(Constants.bot.token);
